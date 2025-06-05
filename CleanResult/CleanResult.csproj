@@ -9,9 +9,9 @@
         <Description>Clean solution for your Result problem.
 This nugget package implement result ty the Rust way!</Description>
         <PackageProjectUrl>https://github.com/Gwynbleid85/CleanResult</PackageProjectUrl>
-        <PackageLicenseFile>https://github.com/Gwynbleid85/CleanResult/blob/master/LICENSE</PackageLicenseFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageTags>result</PackageTags>
-        <PackageReadmeFile>../README.md</PackageReadmeFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
 
@@ -19,4 +19,13 @@ This nugget package implement result ty the Rust way!</Description>
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Include="LICENSE" Pack="true" PackagePath="" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
+    
+    
 </Project>
