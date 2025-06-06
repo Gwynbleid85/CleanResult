@@ -20,12 +20,11 @@ This nugget package implement result ty the Rust way!</Description>
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="LICENSE" Pack="true" PackagePath="" />
+        <None Include="../LICENSE" Pack="true" PackagePath="" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath=""/>
+        <None Include="../README.md" Pack="true" PackagePath=""/>
     </ItemGroup>
-    
     
 </Project>
