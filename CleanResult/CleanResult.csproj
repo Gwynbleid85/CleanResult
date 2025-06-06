@@ -7,7 +7,8 @@
         <Title>CleanResult</Title>
         <Authors>Gwynbleid85</Authors>
         <Description>Clean solution for your Result problem.
-This nugget package implement result ty the Rust way!</Description>
+            This nugget package implement result ty the Rust way!
+        </Description>
         <PackageProjectUrl>https://github.com/Gwynbleid85/CleanResult</PackageProjectUrl>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageTags>result</PackageTags>
@@ -17,16 +18,15 @@ This nugget package implement result ty the Rust way!</Description>
 
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0"/>
+        <!-- Reference to the ASP.NET Core framework -->
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="../LICENSE" Pack="true" PackagePath="" />
+        <None Include="../LICENSE" Pack="true" PackagePath=""/>
         <None Include="../README.md" Pack="true" PackagePath=""/>
         <None Include="..\docs\CleanResultLogo.png" Pack="true" PackagePath=""/>
     </ItemGroup>
 
-    <ItemGroup>
-    </ItemGroup>
-    
 </Project>
