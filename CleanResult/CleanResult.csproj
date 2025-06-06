@@ -12,6 +12,7 @@ This nugget package implement result ty the Rust way!</Description>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageTags>result</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>CleanResultLogo.png</PackageIcon>
     </PropertyGroup>
 
 
@@ -21,10 +22,11 @@ This nugget package implement result ty the Rust way!</Description>
 
     <ItemGroup>
         <None Include="../LICENSE" Pack="true" PackagePath="" />
+        <None Include="../README.md" Pack="true" PackagePath=""/>
+        <None Include="..\docs\CleanResultLogo.png" Pack="true" PackagePath=""/>
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="../README.md" Pack="true" PackagePath=""/>
     </ItemGroup>
     
 </Project>

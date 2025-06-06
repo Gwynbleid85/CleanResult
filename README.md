@@ -1,4 +1,5 @@
 # CleanResult
+![CleanIAM](docs/readme-header.png)
 
 A clean, Rust-inspired Result type implementation for .NET that brings functional error handling to your C# applications. This library provides a robust alternative to traditional exception-based error handling with built-in ASP.NET Core integration.
 
