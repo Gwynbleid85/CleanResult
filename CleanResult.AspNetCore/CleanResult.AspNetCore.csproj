@@ -13,12 +13,12 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>CleanResultLogo.png</PackageIcon>
         <RepositoryUrl>https://github.com/Gwynbleid85/CleanResult</RepositoryUrl>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
-    
+
     <ItemGroup>
-        <PackageReference Include="CleanResult" Version="1.0.1" />
+        <PackageReference Include="CleanResult" Version="1.0.2" />
         <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0"/>
         <!-- Reference to the ASP.NET Core framework -->
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>

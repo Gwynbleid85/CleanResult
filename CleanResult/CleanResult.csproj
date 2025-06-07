@@ -6,19 +6,17 @@
         <Nullable>enable</Nullable>
         <Title>CleanResult</Title>
         <Authors>Gwynbleid85</Authors>
-        <Description>Clean solution for your Result problem.
-            This nugget package implement result ty the Rust way!
-        </Description>
+        <Description>Clean solution for your Result problem. This nugget package implement result ty the Rust way.</Description>
         <PackageProjectUrl>https://github.com/Gwynbleid85/CleanResult</PackageProjectUrl>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageTags>result error success</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>CleanResultLogo.png</PackageIcon>
         <RepositoryUrl>https://github.com/Gwynbleid85/CleanResult</RepositoryUrl>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <None Include="../LICENSE" Pack="true" PackagePath=""/>
         <None Include="../README.md" Pack="true" PackagePath=""/>
