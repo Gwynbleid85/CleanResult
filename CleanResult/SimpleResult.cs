@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CleanResult;
@@ -12,14 +13,21 @@ namespace CleanResult;
 /// </remarks>
 public partial class Result
 {
+    [JsonInclude]
     internal bool Success { get; set; }
+
+    [JsonInclude]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     internal string? ErrorMessage { get; set; }
+
+    [JsonInclude]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     internal int? ErrorCode { get; set; }
 
+    [JsonIgnore]
     public Error ErrorValue => !Success
         ? new Error { Message = ErrorMessage ?? string.Empty, Code = ErrorCode ?? 0 }
         : throw new InvalidOperationException("Result is not an error");
-
 
 
     /// <summary>

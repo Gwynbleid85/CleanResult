@@ -1,7 +1,7 @@
 using System.Net;
+using System.Text.Json.Serialization;
 
 namespace CleanResult;
-
 
 /// <summary>
 /// This class represents the result of an operation.
@@ -9,22 +9,36 @@ namespace CleanResult;
 /// </summary>
 public partial class Result<T>
 {
+    [JsonInclude]
     internal bool Success { get; set; }
+
+    [JsonInclude]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     internal T? SuccessValue { get; set; }
+
+    [JsonInclude]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     internal string? ErrorMessage { get; set; }
+
+    [JsonInclude]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     internal int? ErrorCode { get; set; }
 
     /// <summary>
     /// Value of the result if it represents success.
     /// </summary>
     /// <exception cref="InvalidOperationException">If tried to get Value and result is error </exception>
-    public T Value => SuccessValue ?? throw new InvalidOperationException("Result is not a success");
+    [JsonIgnore]
+    public T Value => Success
+        ? SuccessValue ?? throw new InvalidOperationException("Result is success, but success value is missing")
+        : throw new InvalidOperationException("Result is not a success");
 
 
     /// <summary>
     /// Error value of the result if it represents an error.
     /// </summary>
     /// <exception cref="InvalidOperationException">If tried to get Error value and result is ok </exception>
+    [JsonIgnore]
     public Error ErrorValue => !Success
         ? new Error { Message = ErrorMessage ?? string.Empty, Code = ErrorCode ?? 0 }
         : throw new InvalidOperationException("Result is not an error");
@@ -111,7 +125,7 @@ public partial class Result<T>
     {
         return new Result<T> { Success = false, ErrorMessage = errorMessage };
     }
-    
+
     /// <summary>
     /// Creates a new Result object representing an error.
     /// </summary>

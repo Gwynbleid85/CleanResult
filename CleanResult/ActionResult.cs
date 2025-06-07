@@ -28,7 +28,7 @@ public partial class Result : IActionResult
     }
 }
 
-public partial class Result<T>: IActionResult
+public partial class Result<T> : IActionResult
 {
     public async Task ExecuteResultAsync(ActionContext context)
     {
