@@ -29,7 +29,9 @@ public partial class Result<T>
     /// </summary>
     /// <exception cref="InvalidOperationException">If tried to get Value and result is error </exception>
     [JsonIgnore]
-    public T Value => SuccessValue ?? throw new InvalidOperationException("Result is not a success");
+    public T Value => Success
+        ? SuccessValue ?? throw new InvalidOperationException("Result is success, but success value is missing")
+        : throw new InvalidOperationException("Result is not a success");
 
 
     /// <summary>
