@@ -3,8 +3,12 @@ using Microsoft.AspNetCore.Http;
 
 namespace CleanResult;
 
-public partial class Result : IResult
+public class AspResult(bool success, string? errorMessage, int? errorCode) : IResult
 {
+    private bool Success { get; } = success;
+    private string? ErrorMessage { get; } = errorMessage;
+    private int? ErrorCode { get; } = errorCode;
+
     public async Task ExecuteAsync(HttpContext httpContext)
     {
         if (Success)
@@ -27,8 +31,13 @@ public partial class Result : IResult
     }
 }
 
-public partial class Result<T> : IResult
+public class AspResult<T>(bool success, T? successValue, string? errorMessage, int? errorCode) : IResult
 {
+    private bool Success { get; } = success;
+    private T? SuccessValue { get; } = successValue;
+    private string? ErrorMessage { get; } = errorMessage;
+    private int? ErrorCode { get; } = errorCode;
+
     public async Task ExecuteAsync(HttpContext httpContext)
     {
         if (Success)
