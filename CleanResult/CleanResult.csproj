@@ -13,7 +13,7 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>CleanResultLogo.png</PackageIcon>
         <RepositoryUrl>https://github.com/Gwynbleid85/CleanResult</RepositoryUrl>
-        <Version>1.0.2</Version>
+        <Version>1.1.0</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
@@ -21,6 +21,12 @@
         <None Include="../LICENSE" Pack="true" PackagePath=""/>
         <None Include="../README.md" Pack="true" PackagePath=""/>
         <None Include="..\docs\CleanResultLogo.png" Pack="true" PackagePath=""/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0"/>
+        <!-- Reference to the ASP.NET Core framework -->
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
 
 </Project>

@@ -1,5 +1,7 @@
 using System.Net;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http;
 
 namespace CleanResult;
 
@@ -7,7 +9,7 @@ namespace CleanResult;
 /// This class represents the result of an operation.
 /// It is inspired by Rust's Result type.
 /// </summary>
-public class Result<T>
+public class Result<T> : IResult
 {
     [JsonInclude]
     internal bool Success { get; set; }
@@ -42,6 +44,36 @@ public class Result<T>
     public Error ErrorValue => !Success
         ? new Error { Message = ErrorMessage ?? string.Empty, Code = ErrorCode ?? 0 }
         : throw new InvalidOperationException("Result is not an error");
+
+    /// <summary>
+    /// IResult interface implementation to allow using in the same way as IResult.
+    /// </summary>
+    public async Task ExecuteAsync(HttpContext httpContext)
+    {
+        if (IsOk())
+        {
+            httpContext.Response.StatusCode = StatusCodes.Status200OK;
+            httpContext.Response.ContentType = "application/json";
+            await httpContext.Response.WriteAsync(JsonSerializer.Serialize(Value,
+                new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                }));
+            return;
+        }
+
+        // Error
+        httpContext.Response.StatusCode = ErrorValue.Code;
+        httpContext.Response.ContentType = "application/json";
+        await httpContext.Response.WriteAsync(JsonSerializer.Serialize(new
+            {
+                ErrorValue.Message, ErrorValue.Code
+            }, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            }
+        ));
+    }
 
 
     /// <summary>
