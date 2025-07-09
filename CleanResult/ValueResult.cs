@@ -19,12 +19,9 @@ public class Result<T> : IResult
     internal T? SuccessValue { get; set; }
 
     [JsonInclude]
+    [JsonPropertyName("ErrorValue")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    internal string? ErrorMessage { get; set; }
-
-    [JsonInclude]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    internal int? ErrorCode { get; set; }
+    internal Error? InternalErrorValue { get; init; }
 
     /// <summary>
     /// Value of the result if it represents success.
@@ -35,14 +32,13 @@ public class Result<T> : IResult
         ? SuccessValue ?? throw new InvalidOperationException("Result is success, but success value is missing")
         : throw new InvalidOperationException("Result is not a success");
 
-
     /// <summary>
     /// Error value of the result if it represents an error.
     /// </summary>
     /// <exception cref="InvalidOperationException">If tried to get Error value and result is ok </exception>
     [JsonIgnore]
     public Error ErrorValue => !Success
-        ? new Error { Message = ErrorMessage ?? string.Empty, Code = ErrorCode ?? 0 }
+        ? InternalErrorValue ?? new Error { Title = "Unknown error", Status = StatusCodes.Status500InternalServerError }
         : throw new InvalidOperationException("Result is not an error");
 
     /// <summary>
@@ -63,16 +59,9 @@ public class Result<T> : IResult
         }
 
         // Error
-        httpContext.Response.StatusCode = ErrorValue.Code;
+        httpContext.Response.StatusCode = ErrorValue.Status;
         httpContext.Response.ContentType = "application/json";
-        await httpContext.Response.WriteAsync(JsonSerializer.Serialize(new
-            {
-                ErrorValue.Message, ErrorValue.Code
-            }, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            }
-        ));
+        await httpContext.Response.WriteAsync(JsonSerializer.Serialize(InternalErrorValue));
     }
 
 
@@ -92,8 +81,7 @@ public class Result<T> : IResult
         return new Result<T>
         {
             Success = result.Success,
-            ErrorMessage = result.ErrorMessage,
-            ErrorCode = result.ErrorCode,
+            InternalErrorValue = result.InternalErrorValue,
             SuccessValue = default
         };
     }
@@ -103,13 +91,12 @@ public class Result<T> : IResult
     {
         if (result.Success)
             throw new InvalidOperationException(
-                "Cannot convert one generics success result to another (only error results are possible)!");
+                "Cannot convert one generics success result to another (only error results are possible to convert)!");
 
         return new Result<T>
         {
             Success = result.Success,
-            ErrorMessage = result.ErrorMessage,
-            ErrorCode = result.ErrorCode,
+            InternalErrorValue = result.InternalErrorValue,
             SuccessValue = default
         };
     }
@@ -127,45 +114,66 @@ public class Result<T> : IResult
     /// <summary>
     /// Creates a new Result object representing an error.
     /// </summary>
-    /// <param name="errorMessage">Error message</param>
-    /// <param name="errorCode">Error code</param>
+    /// <param name="title">A short, human-readable summary of the problem type</param>
     /// <returns>Result object representing an error</returns>
-    public static Result<T> Error(string errorMessage, int errorCode)
+    public static Result<T> Error(string title)
     {
-        return new Result<T> { Success = false, ErrorMessage = errorMessage, ErrorCode = errorCode };
+        return new Result<T>
+        {
+            Success = false,
+            InternalErrorValue = new Error { Title = title, Status = (int)HttpStatusCode.InternalServerError }
+        };
+    }
+
+    /// <summary>
+    /// Creates a new Result object representing an error.
+    /// </summary>
+    /// <param name="title">A short, human-readable summary of the problem type</param>
+    /// <param name="status">The HTTP status code</param>
+    /// <param name="type">A URI reference that identifies the problem type</param>
+    /// <param name="detail">A human-readable explanation specific to this occurrence of the problem</param>
+    /// <param name="instance">A URI reference that identifies the specific occurrence of the problem</param>
+    /// <returns>Result object representing an error</returns>
+    public static Result<T> Error(string title, int status,
+        string? type = null, string? detail = null, string? instance = null)
+    {
+        return new Result<T>
+        {
+            Success = false,
+            InternalErrorValue = new Error
+                { Type = type, Title = title, Status = status, Detail = detail, Instance = instance }
+        };
     }
 
 
     /// <summary>
     /// Creates a new Result object representing an error.
     /// </summary>
-    /// <param name="errorMessage">Error message</param>
-    /// <param name="errorCode">Error code</param>
+    /// <param name="title">A short, human-readable summary of the problem type</param>
+    /// <param name="status">The HTTP status code</param>
+    /// <param name="type">A URI reference that identifies the problem type</param>
+    /// <param name="detail">A human-readable explanation specific to this occurrence of the problem</param>
+    /// <param name="instance">A URI reference that identifies the specific occurrence of the problem</param>
     /// <returns>Result object representing an error</returns>
-    public static Result<T> Error(string errorMessage, HttpStatusCode errorCode)
+    public static Result<T> Error(string title, HttpStatusCode status,
+        string? type = null, string? detail = null, string? instance = null)
     {
-        return new Result<T> { Success = false, ErrorMessage = errorMessage, ErrorCode = (int)errorCode };
+        return new Result<T>
+        {
+            Success = false,
+            InternalErrorValue = new Error
+                { Type = type, Title = title, Status = (int)status, Detail = detail, Instance = instance }
+        };
     }
-
 
     /// <summary>
     /// Creates a new Result object representing an error.
     /// </summary>
-    /// <param name="errorMessage">Error message</param>
+    /// <param name="error">Error to build result from</param>
     /// <returns>Result object representing an error</returns>
-    public static Result<T> Error(string errorMessage)
+    public static Result<T> Error(Error error)
     {
-        return new Result<T> { Success = false, ErrorMessage = errorMessage };
-    }
-
-    /// <summary>
-    /// Creates a new Result object representing an error.
-    /// </summary>
-    /// <param name="errorMessage">Error to build result from</param>
-    /// <returns>Result object representing an error</returns>
-    public static Result<T> Error(Error errorMessage)
-    {
-        return new Result<T> { Success = false, ErrorMessage = errorMessage.Message, ErrorCode = errorMessage.Code };
+        return new Result { Success = false, InternalErrorValue = error.Clone() };
     }
 
     /// <summary>

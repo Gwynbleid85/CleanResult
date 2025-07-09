@@ -18,7 +18,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CleanResult" Version="1.0.2"/>
+        <PackageReference Include="CleanResult" Version="1.1.0"/>
         <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0"/>
         <!-- Reference to the ASP.NET Core framework -->
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
