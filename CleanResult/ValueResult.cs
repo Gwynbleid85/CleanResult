@@ -7,7 +7,7 @@ namespace CleanResult;
 /// This class represents the result of an operation.
 /// It is inspired by Rust's Result type.
 /// </summary>
-public partial class Result<T>
+public class Result<T>
 {
     [JsonInclude]
     internal bool Success { get; set; }

@@ -1,7 +1,10 @@
 # CleanResult
-![CleanIAM](docs/readme-header.png)
 
-A clean, Rust-inspired Result type implementation for .NET that brings functional error handling to your C# applications. This library provides a robust alternative to traditional exception-based error handling with built-in ASP.NET Core integration.
+![CleanIAM](https://github.com/Gwynbleid85/CleanResult/blob/master/docs/readme-header.png?raw=true)
+
+A clean, Rust-inspired Result type implementation for .NET that brings functional error handling to your C#
+applications. This library provides a robust alternative to traditional exception-based error handling with built-in
+ASP.NET Core integration.
 
 ## Features
 
@@ -259,33 +262,33 @@ public class PaymentService
 
 ### Result (Non-Generic)
 
-| Method | Description |
-|--------|-------------|
-| `Result.Ok()` | Creates a successful result without a value |
-| `Result.Error()` | Creates an error result without details |
-| `Result.Error(string message)` | Creates an error result with a message |
-| `Result.Error(string message, int code)` | Creates an error result with message and code |
+| Method                                              | Description                                               |
+|-----------------------------------------------------|-----------------------------------------------------------|
+| `Result.Ok()`                                       | Creates a successful result without a value               |
+| `Result.Error()`                                    | Creates an error result without details                   |
+| `Result.Error(string message)`                      | Creates an error result with a message                    |
+| `Result.Error(string message, int code)`            | Creates an error result with message and code             |
 | `Result.Error(string message, HttpStatusCode code)` | Creates an error result with message and HTTP status code |
-| `Result.Error(Error error)` | Creates an error result from an Error object |
-| `Result.From<T>(Result<T> result)` | Converts a generic result to non-generic |
-| `bool IsOk()` | Returns true if the result represents success |
-| `bool IsError()` | Returns true if the result represents an error |
-| `Error ErrorValue` | Gets the error details (throws if result is success) |
+| `Result.Error(Error error)`                         | Creates an error result from an Error object              |
+| `Result.From<T>(Result<T> result)`                  | Converts a generic result to non-generic                  |
+| `bool IsOk()`                                       | Returns true if the result represents success             |
+| `bool IsError()`                                    | Returns true if the result represents an error            |
+| `Error ErrorValue`                                  | Gets the error details (throws if result is success)      |
 
 ### Result<T> (Generic)
 
-| Method | Description |
-|--------|-------------|
-| `Result<T>.Ok(T value)` | Creates a successful result with a value |
-| `Result<T>.Error(string message)` | Creates an error result with a message |
-| `Result<T>.Error(string message, int code)` | Creates an error result with message and code |
-| `Result<T>.Error(string message, HttpStatusCode code)` | Creates an error result with message and HTTP status code |
-| `Result<T>.Error(Error error)` | Creates an error result from an Error object |
-| `Result<T>.From<T1>(Result<T1> result)` | Converts between different generic result types (errors only) |
-| `bool IsOk()` | Returns true if the result represents success |
-| `bool IsError()` | Returns true if the result represents an error |
-| `T Value` | Gets the success value (throws if result is error) |
-| `Error ErrorValue` | Gets the error details (throws if result is success) |
+| Method                                                 | Description                                                   |
+|--------------------------------------------------------|---------------------------------------------------------------|
+| `Result<T>.Ok(T value)`                                | Creates a successful result with a value                      |
+| `Result<T>.Error(string message)`                      | Creates an error result with a message                        |
+| `Result<T>.Error(string message, int code)`            | Creates an error result with message and code                 |
+| `Result<T>.Error(string message, HttpStatusCode code)` | Creates an error result with message and HTTP status code     |
+| `Result<T>.Error(Error error)`                         | Creates an error result from an Error object                  |
+| `Result<T>.From<T1>(Result<T1> result)`                | Converts between different generic result types (errors only) |
+| `bool IsOk()`                                          | Returns true if the result represents success                 |
+| `bool IsError()`                                       | Returns true if the result represents an error                |
+| `T Value`                                              | Gets the success value (throws if result is error)            |
+| `Error ErrorValue`                                     | Gets the error details (throws if result is success)          |
 
 ### Error Structure
 
@@ -302,12 +305,15 @@ public struct Error
 When used as return types in ASP.NET Core controllers:
 
 **Success Results:**
+
 - `Result.Ok()` → HTTP 204 No Content
 - `Result<T>.Ok(value)` → HTTP 200 OK with JSON serialized value
 
 **Error Results:**
+
 - Uses the error code as HTTP status code
 - Returns JSON with error details:
+
 ```json
 {
   "message": "Error description",
@@ -320,7 +326,8 @@ When used as return types in ASP.NET Core controllers:
 1. **Prefer Result over Exceptions**: Use Result types for expected error conditions
 2. **Keep Error Messages User-Friendly**: Error messages may be exposed to end users
 3. **Use HTTP Status Codes**: Leverage the HttpStatusCode enum for web APIs
-4. **Check Results Before Accessing Values**: Always use `IsOk()` or `IsError()` before accessing `Value` or `ErrorValue`
+4. **Check Results Before Accessing Values**: Always use `IsOk()` or `IsError()` before accessing `Value` or
+   `ErrorValue`
 5. **Convert When Needed**: Use `Result.From()` to convert between generic results
 
 ## Contributing

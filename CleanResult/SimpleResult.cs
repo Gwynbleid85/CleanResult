@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace CleanResult;
 
@@ -8,10 +7,7 @@ namespace CleanResult;
 /// This class represents the result of an operation.
 /// It is inspired by Rust's Result type.
 /// </summary>
-/// <remarks>
-/// This Type also implements <see cref="IActionResult" />, so it can be user as a return type in endpoints
-/// </remarks>
-public partial class Result
+public class Result
 {
     [JsonInclude]
     internal bool Success { get; set; }

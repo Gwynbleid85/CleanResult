@@ -6,10 +6,10 @@
         <Nullable>enable</Nullable>
         <Title>CleanResult</Title>
         <Authors>Gwynbleid85</Authors>
-        <Description>Clean solution for your Result problem. This nugget package implement result ty the Rust way.</Description>
+        <Description>Extension for CleanResult to support IResult and IActionResult.</Description>
         <PackageProjectUrl>https://github.com/Gwynbleid85/CleanResult</PackageProjectUrl>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
-        <PackageTags>result error success</PackageTags>
+        <PackageTags>result error success aspnet</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>CleanResultLogo.png</PackageIcon>
         <RepositoryUrl>https://github.com/Gwynbleid85/CleanResult</RepositoryUrl>
@@ -18,9 +18,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="CleanResult" Version="1.0.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0"/>
+        <!-- Reference to the ASP.NET Core framework -->
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <None Include="../LICENSE" Pack="true" PackagePath=""/>
         <None Include="../README.md" Pack="true" PackagePath=""/>
-        <None Include="..\docs\CleanResultLogo.png" Pack="true" PackagePath=""/>
+        <None Include="../docs/CleanResultLogo.png" Pack="true" PackagePath=""/>
     </ItemGroup>
 
 </Project>
