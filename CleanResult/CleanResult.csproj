@@ -23,4 +23,10 @@
         <None Include="..\docs\CleanResultLogo.png" Pack="true" PackagePath=""/>
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0"/>
+        <!-- Reference to the ASP.NET Core framework -->
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+    </ItemGroup>
+
 </Project>
