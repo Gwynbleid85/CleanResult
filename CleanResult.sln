@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanResult", "CleanResult\CleanResult.csproj", "{23E4D5C3-A302-4630-A1DC-73D495CCE45D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanResult.AspNetCore", "CleanResult.AspNetCore\CleanResult.AspNetCore.csproj", "{281602E6-16C6-4B57-BB28-B15E5856C7B1}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{9BCD33D8-789C-4F1B-AE7B-B9F7D5A25706}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WolverineDemo", "WolverineDemo\WolverineDemo.csproj", "{281602E6-16C6-4B57-BB28-B15E5856C7B1}"
