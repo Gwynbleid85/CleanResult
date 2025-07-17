@@ -23,7 +23,8 @@ public class Serialization(ITestOutputHelper testOutputHelper)
         var serialized = JsonSerializer.Serialize(result);
 
         testOutputHelper.WriteLine(serialized);
-        Assert.Equal("""{"Success":false,"ErrorMessage":"An error occurred","ErrorCode":123}""", serialized);
+        Assert.Equal("""{"Success":false,"ErrorValue":{"title":"An error occurred","status":123}}""",
+            serialized);
     }
 
     [Fact]
@@ -54,7 +55,7 @@ public class Serialization(ITestOutputHelper testOutputHelper)
         var serialized = JsonSerializer.Serialize(result);
 
         testOutputHelper.WriteLine(serialized);
-        Assert.Equal("""{"Success":false,"ErrorMessage":"Error message","ErrorCode":404}""", serialized);
+        Assert.Equal("""{"Success":false,"ErrorValue":{"title":"Error message","status":404}}""", serialized);
     }
 
     [Fact]
@@ -64,18 +65,18 @@ public class Serialization(ITestOutputHelper testOutputHelper)
         var serialized = JsonSerializer.Serialize(result);
 
         testOutputHelper.WriteLine(serialized);
-        Assert.Equal("""{"Success":false,"ErrorMessage":"Error message","ErrorCode":123}""", serialized);
+        Assert.Equal("""{"Success":false,"ErrorValue":{"title":"Error message","status":123}}""", serialized);
     }
 
     [Fact]
     public void SerializeErrorTestStructValueResult()
     {
-        var error = new Error { Message = "Error message", Code = 123 };
+        var error = new Error { Title = "Error message", Status = 123 };
         var result = Result<TestStruct>.Error(error);
         var serialized = JsonSerializer.Serialize(result);
 
         testOutputHelper.WriteLine(serialized);
-        Assert.Equal("""{"Success":false,"ErrorMessage":"Error message","ErrorCode":123}""", serialized);
+        Assert.Equal("""{"Success":false,"ErrorValue":{"title":"Error message","status":123}}""", serialized);
     }
 
     [Fact]
@@ -92,14 +93,14 @@ public class Serialization(ITestOutputHelper testOutputHelper)
     [Fact]
     public void DeserializeErrorSimpleResult()
     {
-        var json = """{"Success":false,"ErrorMessage":"An error occurred","ErrorCode":123}""";
+        var json = """{"Success":false,"ErrorValue":{"title":"An error occurred","status":123}}""";
         var result = JsonSerializer.Deserialize<Result>(json);
 
         Assert.NotNull(result);
         Assert.True(result.IsError());
         Assert.False(result.IsOk());
-        Assert.Equal("An error occurred", result.ErrorValue.Message);
-        Assert.Equal(123, result.ErrorValue.Code);
+        Assert.Equal("An error occurred", result.ErrorValue.Title);
+        Assert.Equal(123, result.ErrorValue.Status);
     }
 
     [Fact]
@@ -130,39 +131,39 @@ public class Serialization(ITestOutputHelper testOutputHelper)
     [Fact]
     public void DeserializeErrorStringValueResult()
     {
-        var json = """{"Success":false,"ErrorMessage":"Error message","ErrorCode":123}""";
+        var json = """{"Success":false,"ErrorValue":{"title":"Error message","status":123}}""";
         var result = JsonSerializer.Deserialize<Result<string>>(json);
 
         Assert.NotNull(result);
         Assert.True(result.IsError());
         Assert.False(result.IsOk());
-        Assert.Equal("Error message", result.ErrorValue.Message);
-        Assert.Equal(123, result.ErrorValue.Code);
+        Assert.Equal("Error message", result.ErrorValue.Title);
+        Assert.Equal(123, result.ErrorValue.Status);
     }
 
     [Fact]
     public void DeserializeErrorIntValueResult()
     {
-        var json = """{"Success":false,"ErrorMessage":"Error message","ErrorCode":123}""";
+        var json = """{"Success":false,"ErrorValue":{"title":"Error message","status":123}}""";
         var result = JsonSerializer.Deserialize<Result<int>>(json);
 
         Assert.NotNull(result);
         Assert.True(result.IsError());
         Assert.False(result.IsOk());
-        Assert.Equal("Error message", result.ErrorValue.Message);
-        Assert.Equal(123, result.ErrorValue.Code);
+        Assert.Equal("Error message", result.ErrorValue.Title);
+        Assert.Equal(123, result.ErrorValue.Status);
     }
 
     [Fact]
     public void DeserializeErrorTestStructValueResult()
     {
-        var json = """{"Success":false,"ErrorMessage":"Error message","ErrorCode":123}""";
+        var json = """{"Success":false,"ErrorValue":{"title":"Error message","status":123}}""";
         var result = JsonSerializer.Deserialize<Result<TestStruct>>(json);
 
         Assert.NotNull(result);
         Assert.True(result.IsError());
         Assert.False(result.IsOk());
-        Assert.Equal("Error message", result.ErrorValue.Message);
-        Assert.Equal(123, result.ErrorValue.Code);
+        Assert.Equal("Error message", result.ErrorValue.Title);
+        Assert.Equal(123, result.ErrorValue.Status);
     }
 }

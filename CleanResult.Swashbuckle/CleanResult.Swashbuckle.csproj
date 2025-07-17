@@ -4,29 +4,28 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
         <Title>CleanResult</Title>
         <Authors>Gwynbleid85</Authors>
-        <Description>Extension for CleanResult to support IResult and IActionResult.</Description>
+        <Description>Extension of CleanResult to generate nicer OpenAPI schema.</Description>
         <PackageProjectUrl>https://github.com/Gwynbleid85/CleanResult</PackageProjectUrl>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
-        <PackageTags>result error success aspnet</PackageTags>
+        <PackageTags>result error success aspnet OpenApi</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>CleanResultLogo.png</PackageIcon>
         <RepositoryUrl>https://github.com/Gwynbleid85/CleanResult</RepositoryUrl>
-        <Version>1.1.0</Version>
+        <Version>1.2.2</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CleanResult" Version="1.0.2"/>
-        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0"/>
-        <!-- Reference to the ASP.NET Core framework -->
-        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+        <PackageReference Include="CleanResult" Version="1.2.2" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.3"/>
     </ItemGroup>
 
     <ItemGroup>
         <None Include="../LICENSE" Pack="true" PackagePath=""/>
-        <None Include="../README.md" Pack="true" PackagePath=""/>
+        <None Include="README.md" Pack="true" PackagePath=""/>
         <None Include="../docs/CleanResultLogo.png" Pack="true" PackagePath=""/>
     </ItemGroup>
 

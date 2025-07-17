@@ -1,3 +1,4 @@
+using System.Net;
 using CleanResult;
 
 namespace Tests;
@@ -20,8 +21,8 @@ public class SimpleError
 
         Assert.True(result.IsError());
         Assert.False(result.IsOk());
-        Assert.Equal(0, result.ErrorValue.Code);
-        Assert.Equal(String.Empty, result.ErrorValue.Message);
+        Assert.Equal(500, result.ErrorValue.Status);
+        Assert.Equal("Unknown error", result.ErrorValue.Title);
     }
 
     [Fact]
@@ -31,8 +32,8 @@ public class SimpleError
 
         Assert.True(result.IsError());
         Assert.False(result.IsOk());
-        Assert.Equal(0, result.ErrorValue.Code);
-        Assert.Equal("Error message", result.ErrorValue.Message);
+        Assert.Equal(500, result.ErrorValue.Status);
+        Assert.Equal("Error message", result.ErrorValue.Title);
     }
 
     [Fact]
@@ -42,30 +43,30 @@ public class SimpleError
 
         Assert.True(result.IsError());
         Assert.False(result.IsOk());
-        Assert.Equal(404, result.ErrorValue.Code);
-        Assert.Equal("Error message", result.ErrorValue.Message);
+        Assert.Equal(404, result.ErrorValue.Status);
+        Assert.Equal("Error message", result.ErrorValue.Title);
     }
 
     [Fact]
     public void ErrorResultWithErrorMessageAndHttpStatusCode()
     {
-        var result = Result.Error("Error message", System.Net.HttpStatusCode.NotFound);
+        var result = Result.Error("Error message", HttpStatusCode.NotFound);
 
         Assert.True(result.IsError());
         Assert.False(result.IsOk());
-        Assert.Equal(404, result.ErrorValue.Code);
-        Assert.Equal("Error message", result.ErrorValue.Message);
+        Assert.Equal(404, result.ErrorValue.Status);
+        Assert.Equal("Error message", result.ErrorValue.Title);
     }
 
     [Fact]
     public void ErrorResultWithErrorObject()
     {
-        var error = new Error { Message = "Error message", Code = 500 };
+        var error = new Error { Title = "Error message", Status = 500 };
         var result = Result.Error(error);
 
         Assert.True(result.IsError());
         Assert.False(result.IsOk());
-        Assert.Equal(500, result.ErrorValue.Code);
-        Assert.Equal("Error message", result.ErrorValue.Message);
+        Assert.Equal(500, result.ErrorValue.Status);
+        Assert.Equal("Error message", result.ErrorValue.Title);
     }
 }
