@@ -1,0 +1,113 @@
+name: Publish NuGet Packages
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+
+    - name: Validate tag format
+      run: |
+        TAG_NAME=${GITHUB_REF#refs/tags/}
+        if [[ ! "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Error: Tag '$TAG_NAME' does not follow semantic versioning format (v{major}.{minor}.{patch})"
+          exit 1
+        fi
+        echo "Tag format validated: $TAG_NAME"
+
+    - name: Extract version from tag
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Extracted version: $VERSION"
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    - name: Restore dependencies
+      run: dotnet restore CleanResult.sln
+
+    - name: Build solution
+      run: dotnet build CleanResult.sln --configuration Release --no-restore
+
+    - name: Run Tests project
+      run: dotnet test Tests/Tests.csproj --no-build --configuration Release
+
+    - name: Run WolverineTests project
+      run: dotnet test WolverineTests/WolverineTests.csproj --no-build --configuration Release
+
+    - name: Update CleanResult package version
+      run: |
+        sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/" CleanResult/CleanResult.csproj
+        echo "Updated CleanResult version to $VERSION"
+
+    - name: Update CleanResult.WolverineFx package version and dependency
+      run: |
+        sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/" CleanResult.WolverineFx/CleanResult.WolverineFx.csproj
+        sed -i "s/<PackageReference Include=\"CleanResult\" Version=\".*\" \/>/<PackageReference Include=\"CleanResult\" Version=\"$VERSION\" \/>/" CleanResult.WolverineFx/CleanResult.WolverineFx.csproj
+        echo "Updated CleanResult.WolverineFx version and dependency to $VERSION"
+
+    - name: Update CleanResult.Swashbuckle package version and dependency
+      run: |
+        sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/" CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj
+        sed -i "s/<PackageReference Include=\"CleanResult\" Version=\".*\" \/>/<PackageReference Include=\"CleanResult\" Version=\"$VERSION\" \/>/" CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj
+        echo "Updated CleanResult.Swashbuckle version and dependency to $VERSION"
+
+    - name: Commit version updates
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add CleanResult/CleanResult.csproj CleanResult.WolverineFx/CleanResult.WolverineFx.csproj CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj
+        git commit -m "chore: update package versions to $VERSION"
+
+    - name: Build solution after version updates
+      run: dotnet build CleanResult.sln --configuration Release
+
+    - name: Pack CleanResult package
+      run: dotnet pack CleanResult/CleanResult.csproj --configuration Release --no-build --output ./nupkg
+
+    - name: Pack CleanResult.WolverineFx package
+      run: dotnet pack CleanResult.WolverineFx/CleanResult.WolverineFx.csproj --configuration Release --no-build --output ./nupkg
+
+    - name: Pack CleanResult.Swashbuckle package
+      run: dotnet pack CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj --configuration Release --no-build --output ./nupkg
+
+    - name: Publish packages to NuGet
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      run: |
+        dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key $NUGET_API_KEY --skip-duplicate
+
+    - name: Push version updates to repository
+      run: git push origin HEAD:${{ github.ref_name }}
+
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        body: |
+          ## CleanResult ${{ env.VERSION }}
+          
+          This release includes the following NuGet packages:
+          - CleanResult v${{ env.VERSION }}
+          - CleanResult.WolverineFx v${{ env.VERSION }}
+          - CleanResult.Swashbuckle v${{ env.VERSION }}
+          
+          All packages have been published to NuGet.org and are available for download.
+        draft: false
+        prerelease: false
