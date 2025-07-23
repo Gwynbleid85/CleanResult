@@ -81,6 +81,48 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
     }
 
     /// <summary>
+    /// Checks if a Variable represents a tuple type and extracts the inner values as Variables.
+    /// </summary>
+    /// <param name="variable">The variable to check</param>
+    /// <returns>Array of Variables representing tuple elements if the variable is a tuple, otherwise null</returns>
+    private static Variable[] GetTupleInnerValues(Variable variable)
+    {
+        var type = variable.VariableType;
+
+        // Check if the type is a tuple (ValueTuple)
+        if (!type.IsGenericType)
+            return [];
+
+        var genericTypeDefinition = type.GetGenericTypeDefinition();
+
+        // Check for ValueTuple types (ValueTuple<T1>, ValueTuple<T1,T2>, etc.)
+        if (genericTypeDefinition.FullName?.StartsWith("System.ValueTuple") == true)
+        {
+            var tupleTypes = type.GetGenericArguments();
+            var variables = new Variable[tupleTypes.Length];
+
+            for (var i = 0; i < tupleTypes.Length; i++)
+                variables[i] = new Variable(tupleTypes[i], $"{variable.Usage}.Item{i + 1}");
+
+            return variables;
+        }
+
+        // Check for legacy Tuple types (Tuple<T1>, Tuple<T1,T2>, etc.)
+        if (genericTypeDefinition.FullName?.StartsWith("System.Tuple") == true)
+        {
+            var tupleTypes = type.GetGenericArguments();
+            var variables = new Variable[tupleTypes.Length];
+
+            for (var i = 0; i < tupleTypes.Length; i++)
+                variables[i] = new Variable(tupleTypes[i], $"{variable.Usage}.Item{i + 1}");
+
+            return variables;
+        }
+
+        return [];
+    }
+
+    /// <summary>
     /// Generate code for the continuation frame that checks the non-generics cleanResult of the handler execution.
     /// </summary>
     private class MaybeEndHandlerWithCleanResultFrame : AsyncFrame
@@ -128,6 +170,16 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
         {
             uses.Add(result);
             // Register a new variable for the success value of the Result<T>
+            creates.Add(new Variable(result.VariableType.GetGenericArguments()[0], result.Usage + "SuccessValue"));
+
+            var tupleInnerValues = GetTupleInnerValues(new Variable(result.VariableType.GetGenericArguments()[0],
+                result.Usage + "SuccessValue"));
+
+            // If the Result<T> is a tuple, create variables for each inner value
+            foreach (var innerValue in tupleInnerValues)
+                creates.Add(innerValue);
+
+
             creates.Add(new Variable(result.VariableType.GetGenericArguments()[0], result.Usage + "SuccessValue"));
             _result = result;
             _handlerReturnType = handlerReturnType;
