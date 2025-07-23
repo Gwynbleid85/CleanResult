@@ -150,7 +150,7 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
 
             writer.WriteComment("Extracting the success value from Result<T>");
             writer.WriteLine(
-                $"{_result.VariableType.GetGenericArguments()[0].FullName} {_result.Usage}SuccessValue = {_result.Usage}.Value;");
+                $"var {_result.Usage}SuccessValue = {_result.Usage}.Value;");
 
             Next?.GenerateCode(method, writer);
         }
