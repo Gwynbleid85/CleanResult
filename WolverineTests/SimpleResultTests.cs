@@ -1,5 +1,6 @@
 using CleanResult;
 using CleanResult.WolverineFx;
+using JasperFx.CodeGeneration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Wolverine;
@@ -16,6 +17,7 @@ public class SimpleResultTests
             .UseWolverine(opts =>
             {
                 opts.CodeGeneration.AddContinuationStrategy<CleanResultContinuationStrategy>();
+                opts.CodeGeneration.TypeLoadMode = TypeLoadMode.Auto;
                 opts.Discovery.IncludeAssembly(typeof(SimpleResultHandler).Assembly);
             })
             .StartAsync();
@@ -26,7 +28,8 @@ public class SimpleResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
         var command = new SimpleCommand(1);
 
         // Act
@@ -42,7 +45,8 @@ public class SimpleResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
         var command = new SimpleCommand(-1); // This will fail in LoadAsync
 
         // Act
@@ -59,7 +63,8 @@ public class SimpleResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
         var command = new SimpleCommand(999); // This will return not found in LoadAsync
 
         // Act

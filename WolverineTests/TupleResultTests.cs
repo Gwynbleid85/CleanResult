@@ -26,7 +26,8 @@ public class TupleResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
         var command = new TupleCommand(1); // Both User and Product with ID 1 exist
 
         // Act
@@ -45,7 +46,8 @@ public class TupleResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
         var command = new TupleCommand(999); // User with ID 999 doesn't exist
 
         // Act
@@ -62,7 +64,8 @@ public class TupleResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
 
         // Add a user with ID 3 but no corresponding product
         DataStore.Users.Add(new User { Id = 3, Name = "Test User", Email = "test@example.com" });
@@ -86,7 +89,8 @@ public class TupleResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
         var command = new TupleCommand(2); // User and Product with ID 2 exist
 
         // Act
@@ -122,8 +126,9 @@ public class AlternativeTupleResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
-        var command = new TupleCommand(4); // Even number for isValid = true
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
+        var command = new AlternativeTupleCommand(4); // Even number for isValid = true
 
         // Act
         var result = await bus.InvokeAsync<Result<string>>(command);
@@ -139,8 +144,9 @@ public class AlternativeTupleResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
-        var command = new TupleCommand(3); // Odd number for isValid = false
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
+        var command = new AlternativeTupleCommand(3); // Odd number for isValid = false
 
         // Act
         var result = await bus.InvokeAsync<Result<string>>(command);
@@ -156,8 +162,9 @@ public class AlternativeTupleResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
-        var command = new TupleCommand(0); // Invalid ID
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
+        var command = new AlternativeTupleCommand(0); // Invalid ID
 
         // Act
         var result = await bus.InvokeAsync<Result<string>>(command);

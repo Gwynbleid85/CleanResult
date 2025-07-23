@@ -2,12 +2,18 @@ namespace WolverineTests;
 
 // Simple commands for testing
 public record SimpleCommand(int Id);
+
 public record GenericCommand(int Id);
+
 public record TupleCommand(int Id);
+
+public record AlternativeTupleCommand(int Id);
 
 // Response DTOs
 public record UserDto(int Id, string Name, string Email);
+
 public record ProductDto(int Id, string Name, decimal Price);
+
 public record OrderDto(int Id, int UserId, int ProductId, int Quantity);
 
 // Domain entities

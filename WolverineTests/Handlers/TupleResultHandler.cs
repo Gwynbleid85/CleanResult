@@ -49,7 +49,7 @@ public class TupleResultHandler
 public class AlternativeTupleHandler
 {
     // Load method returning Result<(int, string, bool)>
-    public static async Task<Result<(int count, string message, bool isValid)>> LoadAsync(TupleCommand command)
+    public static async Task<Result<(int count, string message, bool isValid)>> LoadAsync(AlternativeTupleCommand command)
     {
         await Task.Delay(5);
 
@@ -60,7 +60,7 @@ public class AlternativeTupleHandler
     }
 
     // Handle method receiving the tuple value
-    public static async Task<Result<string>> Handle(TupleCommand command,
+    public static async Task<Result<string>> Handle(AlternativeTupleCommand command,
         (int count, string message, bool isValid) loadAsyncSuccessValue)
     {
         await Task.Delay(5);

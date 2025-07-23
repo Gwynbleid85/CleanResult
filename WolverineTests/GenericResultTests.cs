@@ -26,7 +26,8 @@ public class GenericResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
         var command = new GenericCommand(1); // User with ID 1 exists in DataStore
 
         // Act
@@ -44,7 +45,8 @@ public class GenericResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
         var command = new GenericCommand(999); // User with ID 999 doesn't exist
 
         // Act
@@ -61,7 +63,8 @@ public class GenericResultTests
     {
         // Arrange
         using var host = await CreateHost();
-        var bus = host.Services.GetRequiredService<IMessageBus>();
+        using var scope = host.Services.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
 
         // Act & Assert for User 1
         var result1 = await bus.InvokeAsync<Result<UserDto>>(new GenericCommand(1));
