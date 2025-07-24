@@ -15,10 +15,9 @@ public struct Error
     /// "about:blank".
     /// </summary>
     [JsonInclude]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [JsonPropertyOrder(-5)]
     [JsonPropertyName("type")]
-    public string? Type { get; set; }
+    public required string Type { get; set; }
 
     /// <summary>
     /// A short, human-readable summary of the problem type. It SHOULD NOT change from occurrence to occurrence

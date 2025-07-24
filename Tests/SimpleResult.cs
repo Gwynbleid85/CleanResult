@@ -61,7 +61,7 @@ public class SimpleError
     [Fact]
     public void ErrorResultWithErrorObject()
     {
-        var error = new Error { Title = "Error message", Status = 500 };
+        var error = new Error { Type = "https://asdf.com", Title = "Error message", Status = 500 };
         var result = Result.Error(error);
 
         Assert.True(result.IsError());

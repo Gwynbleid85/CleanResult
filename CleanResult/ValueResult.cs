@@ -38,7 +38,12 @@ public class Result<T> : IResult
     /// <exception cref="InvalidOperationException">If tried to get Error value and result is ok </exception>
     [JsonIgnore]
     public Error ErrorValue => !Success
-        ? InternalErrorValue ?? new Error { Title = "Unknown error", Status = StatusCodes.Status500InternalServerError }
+        ? InternalErrorValue ?? new Error
+        {
+            Type = ProblemDetailsTypeMappings.GetProblemType(500),
+            Title = "Unknown error",
+            Status = StatusCodes.Status500InternalServerError
+        }
         : throw new InvalidOperationException("Result is not an error");
 
     /// <summary>
@@ -121,7 +126,12 @@ public class Result<T> : IResult
         return new Result<T>
         {
             Success = false,
-            InternalErrorValue = new Error { Title = title, Status = (int)HttpStatusCode.InternalServerError }
+            InternalErrorValue = new Error
+            {
+                Type = ProblemDetailsTypeMappings.GetProblemType((int)HttpStatusCode.InternalServerError),
+                Title = title,
+                Status = (int)HttpStatusCode.InternalServerError
+            }
         };
     }
 
@@ -141,7 +151,13 @@ public class Result<T> : IResult
         {
             Success = false,
             InternalErrorValue = new Error
-                { Type = type, Title = title, Status = status, Detail = detail, Instance = instance }
+            {
+                Type = type ?? ProblemDetailsTypeMappings.GetProblemType(status),
+                Title = title,
+                Status = status,
+                Detail = detail,
+                Instance = instance
+            }
         };
     }
 
@@ -162,7 +178,13 @@ public class Result<T> : IResult
         {
             Success = false,
             InternalErrorValue = new Error
-                { Type = type, Title = title, Status = (int)status, Detail = detail, Instance = instance }
+            {
+                Type = type ?? ProblemDetailsTypeMappings.GetProblemType((int)status),
+                Title = title,
+                Status = (int)status,
+                Detail = detail,
+                Instance = instance
+            }
         };
     }
 

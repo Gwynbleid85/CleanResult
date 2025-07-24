@@ -23,7 +23,8 @@ public class Serialization(ITestOutputHelper testOutputHelper)
         var serialized = JsonSerializer.Serialize(result);
 
         testOutputHelper.WriteLine(serialized);
-        Assert.Equal("""{"Success":false,"ErrorValue":{"title":"An error occurred","status":123}}""",
+        Assert.Equal(
+            """{"Success":false,"ErrorValue":{"type":"https://tools.ietf.org/html/rfc7231","title":"An error occurred","status":123}}""",
             serialized);
     }
 
@@ -55,7 +56,9 @@ public class Serialization(ITestOutputHelper testOutputHelper)
         var serialized = JsonSerializer.Serialize(result);
 
         testOutputHelper.WriteLine(serialized);
-        Assert.Equal("""{"Success":false,"ErrorValue":{"title":"Error message","status":404}}""", serialized);
+        Assert.Equal(
+            """{"Success":false,"ErrorValue":{"type":"https://tools.ietf.org/html/rfc7231#section-6.5.4","title":"Error message","status":404}}""",
+            serialized);
     }
 
     [Fact]
@@ -65,18 +68,22 @@ public class Serialization(ITestOutputHelper testOutputHelper)
         var serialized = JsonSerializer.Serialize(result);
 
         testOutputHelper.WriteLine(serialized);
-        Assert.Equal("""{"Success":false,"ErrorValue":{"title":"Error message","status":123}}""", serialized);
+        Assert.Equal(
+            """{"Success":false,"ErrorValue":{"type":"https://tools.ietf.org/html/rfc7231","title":"Error message","status":123}}""",
+            serialized);
     }
 
     [Fact]
     public void SerializeErrorTestStructValueResult()
     {
-        var error = new Error { Title = "Error message", Status = 123 };
+        var error = new Error { Type = "https://asdf.com", Title = "Error message", Status = 123 };
         var result = Result<TestStruct>.Error(error);
         var serialized = JsonSerializer.Serialize(result);
 
         testOutputHelper.WriteLine(serialized);
-        Assert.Equal("""{"Success":false,"ErrorValue":{"title":"Error message","status":123}}""", serialized);
+        Assert.Equal(
+            """{"Success":false,"ErrorValue":{"type":"https://asdf.com","title":"Error message","status":123}}""",
+            serialized);
     }
 
     [Fact]
@@ -93,7 +100,7 @@ public class Serialization(ITestOutputHelper testOutputHelper)
     [Fact]
     public void DeserializeErrorSimpleResult()
     {
-        var json = """{"Success":false,"ErrorValue":{"title":"An error occurred","status":123}}""";
+        var json = """{"Success":false,"ErrorValue":{"type":"","title":"An error occurred","status":123}}""";
         var result = JsonSerializer.Deserialize<Result>(json);
 
         Assert.NotNull(result);
@@ -131,7 +138,7 @@ public class Serialization(ITestOutputHelper testOutputHelper)
     [Fact]
     public void DeserializeErrorStringValueResult()
     {
-        var json = """{"Success":false,"ErrorValue":{"title":"Error message","status":123}}""";
+        var json = """{"Success":false,"ErrorValue":{"type":"","title":"Error message","status":123}}""";
         var result = JsonSerializer.Deserialize<Result<string>>(json);
 
         Assert.NotNull(result);
@@ -144,7 +151,7 @@ public class Serialization(ITestOutputHelper testOutputHelper)
     [Fact]
     public void DeserializeErrorIntValueResult()
     {
-        var json = """{"Success":false,"ErrorValue":{"title":"Error message","status":123}}""";
+        var json = """{"Success":false,"ErrorValue":{"type":"","title":"Error message","status":123}}""";
         var result = JsonSerializer.Deserialize<Result<int>>(json);
 
         Assert.NotNull(result);
@@ -157,7 +164,7 @@ public class Serialization(ITestOutputHelper testOutputHelper)
     [Fact]
     public void DeserializeErrorTestStructValueResult()
     {
-        var json = """{"Success":false,"ErrorValue":{"title":"Error message","status":123}}""";
+        var json = """{"Success":false,"ErrorValue":{"type":"","title":"Error message","status":123}}""";
         var result = JsonSerializer.Deserialize<Result<TestStruct>>(json);
 
         Assert.NotNull(result);

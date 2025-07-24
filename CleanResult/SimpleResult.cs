@@ -21,7 +21,12 @@ public class Result : IResult
 
     [JsonIgnore]
     public Error ErrorValue => !Success
-        ? InternalErrorValue ?? new Error { Title = "Unknown error", Status = StatusCodes.Status500InternalServerError }
+        ? InternalErrorValue ?? new Error
+        {
+            Type = ProblemDetailsTypeMappings.GetProblemType(500),
+            Title = "Unknown error",
+            Status = StatusCodes.Status500InternalServerError
+        }
         : throw new InvalidOperationException("Result is not an error");
 
     /// <summary>
@@ -98,7 +103,12 @@ public class Result : IResult
         return new Result
         {
             Success = false,
-            InternalErrorValue = new Error { Title = title, Status = (int)HttpStatusCode.InternalServerError }
+            InternalErrorValue = new Error
+            {
+                Type = ProblemDetailsTypeMappings.GetProblemType(500),
+                Title = title,
+                Status = (int)HttpStatusCode.InternalServerError
+            }
         };
     }
 
@@ -118,7 +128,13 @@ public class Result : IResult
         {
             Success = false,
             InternalErrorValue = new Error
-                { Type = type, Title = title, Status = status, Detail = detail, Instance = instance }
+            {
+                Type = type ?? ProblemDetailsTypeMappings.GetProblemType(status),
+                Title = title,
+                Status = status,
+                Detail = detail,
+                Instance = instance
+            }
         };
     }
 
@@ -140,7 +156,13 @@ public class Result : IResult
         {
             Success = false,
             InternalErrorValue = new Error
-                { Type = type, Title = title, Status = (int)status, Detail = detail, Instance = instance }
+            {
+                Type = type ?? ProblemDetailsTypeMappings.GetProblemType(500),
+                Title = title,
+                Status = (int)status,
+                Detail = detail,
+                Instance = instance
+            }
         };
     }
 

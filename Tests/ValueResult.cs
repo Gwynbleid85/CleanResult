@@ -69,7 +69,7 @@ public class ValueResult
     [Fact]
     public void ErrorResultWithStructValue()
     {
-        var error = new Error { Title = "Error message", Status = 500 };
+        var error = new Error { Type = "https://asdf.com", Title = "Error message", Status = 500 };
         var result = Result<TestStruct>.Error(error);
 
         Assert.True(result.IsError());
