@@ -58,7 +58,9 @@ public class Interfaces
         Assert.Equal(StatusCodes.Status404NotFound, httpContext.Response.StatusCode);
         Assert.Equal("application/json", httpContext.Response.ContentType);
         var bodyText = HttpContextUtils.ReadContextBody(httpContext);
-        Assert.Contains("""{"title":"Error message","status":404}""", bodyText);
+        Assert.Contains(
+            """{"type":"https://tools.ietf.org/html/rfc7231#section-6.5.4","title":"Error message","status":404}""",
+            bodyText);
     }
 
     [Fact]
