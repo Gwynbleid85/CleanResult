@@ -120,9 +120,10 @@ public class Result : IResult
     /// <param name="type">A URI reference that identifies the problem type</param>
     /// <param name="detail">A human-readable explanation specific to this occurrence of the problem</param>
     /// <param name="instance">A URI reference that identifies the specific occurrence of the problem</param>
+    /// <param name="errors">Dictionary od additional errors</param>
     /// <returns>Result object representing an error</returns>
     public static Result Error(string title, int status, string? type = null,
-        string? detail = null, string? instance = null)
+        string? detail = null, string? instance = null, IDictionary<string, string[]>? errors = null)
     {
         return new Result
         {
@@ -133,7 +134,8 @@ public class Result : IResult
                 Title = title,
                 Status = status,
                 Detail = detail,
-                Instance = instance
+                Instance = instance,
+                Errors = errors
             }
         };
     }
@@ -147,10 +149,11 @@ public class Result : IResult
     /// <param name="type">A URI reference that identifies the problem type</param>
     /// <param name="detail">A human-readable explanation specific to this occurrence of the problem</param>
     /// <param name="instance">A URI reference that identifies the specific occurrence of the problem</param>
+    /// <param name="errors">Dictionary od additional errors</param>
     /// <returns>Result object representing an error</returns>
     public static Result Error(string title, HttpStatusCode status,
         string? type = null,
-        string? detail = null, string? instance = null)
+        string? detail = null, string? instance = null, IDictionary<string, string[]>? errors = null)
     {
         return new Result
         {
@@ -161,7 +164,8 @@ public class Result : IResult
                 Title = title,
                 Status = (int)status,
                 Detail = detail,
-                Instance = instance
+                Instance = instance,
+                Errors = errors
             }
         };
     }
