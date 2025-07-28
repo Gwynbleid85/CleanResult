@@ -77,4 +77,14 @@ public class ValueResult
         Assert.Equal(500, result.ErrorValue.Status);
         Assert.Equal("Error message", result.ErrorValue.Title);
     }
+
+    [Fact]
+    public void SuccessValueIsNullable()
+    {
+        var result = Result<int?>.Ok(null);
+
+        Assert.False(result.IsError());
+        Assert.True(result.IsOk());
+        Assert.Null(result.Value);
+    }
 }

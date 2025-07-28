@@ -1,15 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
-        
+
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2"/>
         <PackageReference Include="WolverineFx" Version="4.7.0"/>
         <PackageReference Include="WolverineFx.Http" Version="4.7.0"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1"/>
@@ -18,6 +17,10 @@
     <ItemGroup>
         <ProjectReference Include="..\CleanResult.Swashbuckle\CleanResult.Swashbuckle.csproj"/>
         <ProjectReference Include="..\CleanResult.WolverineFx\CleanResult.WolverineFx.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="app.log" />
     </ItemGroup>
 
 </Project>
