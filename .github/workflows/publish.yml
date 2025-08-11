@@ -67,10 +67,19 @@ jobs:
     needs: [validate, test]
     
     steps:
+    - name: Check api key
+      run: |
+        if [ -z "${{ secrets.REPOSITORY_TOKEN }}" ]; then
+        echo "Error: REPOSITORY_TOKEN secret is not set."
+        exit 1
+        else
+        echo "REPOSITORY_TOKEN is set."
+        fi
+  
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.REPOSITORY_TOKEN }}
         fetch-depth: 0
 
     - name: Update CleanResult package version
@@ -175,7 +184,7 @@ jobs:
     - name: Create GitHub Release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.REPOSITORY_TOKEN }}
       with:
         tag_name: ${{ needs.validate.outputs.tag }}
         release_name: Release ${{ needs.validate.outputs.tag }}
