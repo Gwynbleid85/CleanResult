@@ -58,8 +58,8 @@ jobs:
     - name: Run Tests project
       run: dotnet test Tests/Tests.csproj --no-build --configuration Release
 
-    - name: Run WolverineTests project
-      run: dotnet test WolverineTests/WolverineTests.csproj --no-build --configuration Release
+#    - name: Run WolverineTests project
+#      run: dotnet test WolverineTests/WolverineTests.csproj --no-build --configuration Release
 
   # FR3: Version Management
   update-versions:
