@@ -151,7 +151,9 @@ jobs:
         dotnet pack CleanResult/CleanResult.csproj --configuration Release --no-build --output ./local-packages
 
     - name: Add local package source
-      run: dotnet nuget add source ./local-packages --name local
+      run: |
+        LOCAL_PACKAGES_PATH=$(pwd)/local-packages
+        dotnet nuget add source $LOCAL_PACKAGES_PATH --name local
 
     - name: Restore dependencies for dependent projects
       run: dotnet restore CleanResult.sln
