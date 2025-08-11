@@ -118,7 +118,7 @@ jobs:
         git commit -m "chore: update package versions to $VERSION"
 
     - name: Push version updates to repository
-      run: git push origin HEAD:${{ github.ref_name }}
+      run: git push origin HEAD:release/${{ github.ref_name }}
 
   # FR4: Build and Packaging
   build-and-pack:
@@ -129,7 +129,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        ref: ${{ github.ref_name }}
+        ref: release/${{ github.ref_name }}
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
