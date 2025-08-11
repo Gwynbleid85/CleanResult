@@ -115,10 +115,18 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add CleanResult/CleanResult.csproj CleanResult.WolverineFx/CleanResult.WolverineFx.csproj CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj CleanResult.AspNet/CleanResult.AspNet.csproj
-        git commit -m "chore: update package versions to $VERSION"
+        
+        # Only commit if there are changes
+        if ! git diff --cached --quiet; then
+          git commit -m "chore: update package versions to $VERSION"
+        else
+          echo "No changes to commit"
+        fi
 
     - name: Push version updates to repository
-      run: git push origin HEAD:refs/heads/release/${{ github.ref_name }}
+      run: |
+        # Force push to handle potential conflicts from reruns
+        git push -f origin HEAD:refs/heads/release/${{ github.ref_name }}
 
   # FR4: Build and Packaging
   build-and-pack:
