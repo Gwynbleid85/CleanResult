@@ -114,7 +114,7 @@ jobs:
         VERSION=${{ needs.validate.outputs.version }}
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add CleanResult/CleanResult.csproj CleanResult.WolverineFx/CleanResult.WolverineFx.csproj CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj
+        git add CleanResult/CleanResult.csproj CleanResult.WolverineFx/CleanResult.WolverineFx.csproj CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj CleanResult.AspNet/CleanResult.AspNet.csproj
         git commit -m "chore: update package versions to $VERSION"
 
     - name: Push version updates to repository
@@ -136,20 +136,28 @@ jobs:
       with:
         dotnet-version: '8.x'
 
-    - name: Restore dependencies
+    - name: Build and pack CleanResult first
+      run: |
+        dotnet restore CleanResult/CleanResult.csproj
+        dotnet build CleanResult/CleanResult.csproj --configuration Release --no-restore
+        dotnet pack CleanResult/CleanResult.csproj --configuration Release --no-build --output ./local-packages
+
+    - name: Add local package source
+      run: dotnet nuget add source ./local-packages --name local
+
+    - name: Restore dependencies for dependent projects
       run: dotnet restore CleanResult.sln
 
     - name: Build solution after version updates
       run: dotnet build CleanResult.sln --configuration Release --no-restore
 
-    - name: Pack CleanResult package
-      run: dotnet pack CleanResult/CleanResult.csproj --configuration Release --no-build --output ./nupkg
-
-    - name: Pack CleanResult.WolverineFx package
-      run: dotnet pack CleanResult.WolverineFx/CleanResult.WolverineFx.csproj --configuration Release --no-build --output ./nupkg
-
-    - name: Pack CleanResult.Swashbuckle package
-      run: dotnet pack CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj --configuration Release --no-build --output ./nupkg
+    - name: Pack all packages
+      run: |
+        mkdir -p ./nupkg
+        cp ./local-packages/*.nupkg ./nupkg/
+        dotnet pack CleanResult.WolverineFx/CleanResult.WolverineFx.csproj --configuration Release --no-build --output ./nupkg
+        dotnet pack CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj --configuration Release --no-build --output ./nupkg
+        dotnet pack CleanResult.AspNet/CleanResult.AspNet.csproj --configuration Release --no-build --output ./nupkg
 
     - name: Upload packages as artifacts
       uses: actions/upload-artifact@v4
