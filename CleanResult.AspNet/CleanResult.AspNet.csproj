@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Title>CleanResult</Title>
+        <Authors>Gwynbleid85</Authors>
+        <Description>Extension of CleanResult for creating IActionResult from Result.</Description>
+        <PackageProjectUrl>https://github.com/Gwynbleid85/CleanResult</PackageProjectUrl>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageTags>result error success aspnet OpenApi</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>CleanResultLogo.png</PackageIcon>
+        <RepositoryUrl>https://github.com/Gwynbleid85/CleanResult</RepositoryUrl>
+        <Version>1.2.5</Version>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CleanResult" Version="1.2.5"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="../LICENSE" Pack="true" PackagePath=""/>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+        <None Include="../docs/CleanResultLogo.png" Pack="true" PackagePath=""/>
+    </ItemGroup>
+
+</Project>
