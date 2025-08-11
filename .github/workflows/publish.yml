@@ -92,6 +92,13 @@ jobs:
         sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/" CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj
         sed -i "s/<PackageReference Include=\"CleanResult\" Version=\".*\" \/>/<PackageReference Include=\"CleanResult\" Version=\"$VERSION\" \/>/" CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj
         echo "Updated CleanResult.Swashbuckle version and dependency to $VERSION"
+    
+    - name: Update CleanResult.AspNet package version and dependency
+      run: |
+        VERSION=${{ needs.validate.outputs.version }}
+        sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/" CleanResult.AspNet/CleanResult.AspNet.csproj
+        sed -i "s/<PackageReference Include=\"CleanResult\" Version=\".*\" \/>/<PackageReference Include=\"CleanResult\" Version=\"$VERSION\" \/>/" CleanResult.AspNet/CleanResult.AspNet.csproj
+        echo "Updated CleanResult.AspNet version and dependency to $VERSION"
 
     - name: Commit version updates
       run: |
