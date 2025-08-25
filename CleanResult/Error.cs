@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json.Serialization;
 
 namespace CleanResult;
@@ -64,6 +65,63 @@ public struct Error
     [JsonPropertyOrder(0)]
     [JsonPropertyName("errors")]
     public IDictionary<string, string[]>? Errors { get; set; }
+
+
+    /// <summary>
+    /// Creates a new error.
+    /// </summary>
+    /// <param name="title">A short, human-readable summary of the problem type</param>
+    /// <returns>Result object representing an error</returns>
+    public Error(string title)
+    {
+        Type = ProblemDetailsTypeMappings.GetProblemType(500);
+        Title = title;
+        Status = (int)HttpStatusCode.InternalServerError;
+    }
+
+    /// <summary>
+    /// Creates a new error.
+    /// </summary>
+    /// <param name="title">A short, human-readable summary of the problem type</param>
+    /// <param name="status">The HTTP status code</param>
+    /// <param name="type">A URI reference that identifies the problem type</param>
+    /// <param name="detail">A human-readable explanation specific to this occurrence of the problem</param>
+    /// <param name="instance">A URI reference that identifies the specific occurrence of the problem</param>
+    /// <param name="errors">Dictionary od additional errors</param>
+    /// <returns>Result object representing an error</returns>
+    public Error(string title, int status, string? type = null,
+        string? detail = null, string? instance = null, IDictionary<string, string[]>? errors = null)
+    {
+        Type = type ?? ProblemDetailsTypeMappings.GetProblemType(status);
+        Title = title;
+        Status = status;
+        Detail = detail;
+        Instance = instance;
+        Errors = errors;
+    }
+
+
+    /// <summary>
+    /// Creates a new error.
+    /// </summary>
+    /// <param name="title">A short, human-readable summary of the problem type</param>
+    /// <param name="status">The HTTP status code</param>
+    /// <param name="type">A URI reference that identifies the problem type</param>
+    /// <param name="detail">A human-readable explanation specific to this occurrence of the problem</param>
+    /// <param name="instance">A URI reference that identifies the specific occurrence of the problem</param>
+    /// <param name="errors">Dictionary od additional errors</param>
+    /// <returns>Result object representing an error</returns>
+    public Error(string title, HttpStatusCode status,
+        string? type = null,
+        string? detail = null, string? instance = null, IDictionary<string, string[]>? errors = null)
+    {
+        Type = type ?? ProblemDetailsTypeMappings.GetProblemType(500);
+        Title = title;
+        Status = (int)status;
+        Detail = detail;
+        Instance = instance;
+        Errors = errors;
+    }
 
     public Error Clone()
     {
