@@ -92,21 +92,21 @@ jobs:
       run: |
         VERSION=${{ needs.validate.outputs.version }}
         sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/" CleanResult.WolverineFx/CleanResult.WolverineFx.csproj
-        sed -i "s/<PackageReference Include=\"CleanResult\" Version=\".*\" \/>/<PackageReference Include=\"CleanResult\" Version=\"$VERSION\" \/>/" CleanResult.WolverineFx/CleanResult.WolverineFx.csproj
+        sed -i "s/<PackageReference Include=\"CleanResult\" Version=\"[^\"]*\"[[:space:]]*\/>/<PackageReference Include=\"CleanResult\" Version=\"$VERSION\"\/>/" CleanResult.WolverineFx/CleanResult.WolverineFx.csproj
         echo "Updated CleanResult.WolverineFx version and dependency to $VERSION"
 
     - name: Update CleanResult.Swashbuckle package version and dependency
       run: |
         VERSION=${{ needs.validate.outputs.version }}
         sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/" CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj
-        sed -i "s/<PackageReference Include=\"CleanResult\" Version=\".*\" \/>/<PackageReference Include=\"CleanResult\" Version=\"$VERSION\" \/>/" CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj
+        sed -i "s/<PackageReference Include=\"CleanResult\" Version=\"[^\"]*\"[[:space:]]*\/>/<PackageReference Include=\"CleanResult\" Version=\"$VERSION\"\/>/" CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj
         echo "Updated CleanResult.Swashbuckle version and dependency to $VERSION"
     
     - name: Update CleanResult.AspNet package version and dependency
       run: |
         VERSION=${{ needs.validate.outputs.version }}
         sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/" CleanResult.AspNet/CleanResult.AspNet.csproj
-        sed -i "s/<PackageReference Include=\"CleanResult\" Version=\".*\" \/>/<PackageReference Include=\"CleanResult\" Version=\"$VERSION\" \/>/" CleanResult.AspNet/CleanResult.AspNet.csproj
+        sed -i "s/<PackageReference Include=\"CleanResult\" Version=\"[^\"]*\"[[:space:]]*\/>/<PackageReference Include=\"CleanResult\" Version=\"$VERSION\"\/>/" CleanResult.AspNet/CleanResult.AspNet.csproj
         echo "Updated CleanResult.AspNet version and dependency to $VERSION"
 
     - name: Commit version updates
@@ -213,7 +213,40 @@ jobs:
           - CleanResult v${{ needs.validate.outputs.version }}
           - CleanResult.WolverineFx v${{ needs.validate.outputs.version }}
           - CleanResult.Swashbuckle v${{ needs.validate.outputs.version }}
+          - CleanResult.AspNet v${{ needs.validate.outputs.version }}
           
           All packages have been published to NuGet.org and are available for download.
         draft: false
         prerelease: false
+
+  # FR7: Cleanup and Branch Management
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: [validate, create-release]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.REPOSITORY_TOKEN }}
+        fetch-depth: 0
+
+    - name: Merge release branch to master
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Switch to master and pull latest
+        git checkout master
+        git pull origin master
+        
+        # Merge the release branch
+        git merge origin/release/${{ github.ref_name }} --no-ff -m "chore: merge release/${{ github.ref_name }} into master"
+        
+        # Push the merge
+        git push origin master
+
+    - name: Delete release branch
+      run: |
+        # Delete the remote release branch
+        git push origin --delete release/${{ github.ref_name }}
