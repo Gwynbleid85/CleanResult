@@ -17,6 +17,7 @@ public class ToQueryErrorTests
         var queryError = result.ToQueryError(notFoundErrorMessage);
 
         // Assert
+        Assert.True(result.IsQueryError());
         Assert.False(queryError.IsOk());
         Assert.Equal(notFoundErrorMessage, queryError.ErrorValue.Title);
         Assert.Equal(404, queryError.ErrorValue.Status);
@@ -33,6 +34,7 @@ public class ToQueryErrorTests
         var queryError = originalError.ToQueryError(notFoundErrorMessage);
 
         // Assert
+        Assert.True(originalError.IsQueryError());
         Assert.True(queryError.IsError());
         Assert.Equal(originalError.ErrorValue.Title, queryError.ErrorValue.Title);
         Assert.Equal(originalError.ErrorValue.Status, queryError.ErrorValue.Status);
@@ -46,6 +48,7 @@ public class ToQueryErrorTests
         var notFoundErrorMessage = "Resource not found";
 
         // Act & Assert
+        Assert.False(result.IsQueryError());
         var exception = Assert.Throws<InvalidOperationException>(() => result.ToQueryError(notFoundErrorMessage));
         Assert.Equal("Result is not an error", exception.Message);
     }
