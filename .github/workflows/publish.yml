@@ -109,13 +109,20 @@ jobs:
         sed -i "s/<PackageReference Include=\"CleanResult\" Version=\"[^\"]*\"[[:space:]]*\/>/<PackageReference Include=\"CleanResult\" Version=\"$VERSION\"\/>/" CleanResult.AspNet/CleanResult.AspNet.csproj
         echo "Updated CleanResult.AspNet version and dependency to $VERSION"
 
+    - name: Update CleanResult.FluentValidation package version and dependency
+      run: |
+        VERSION=${{ needs.validate.outputs.version }}
+        sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/" CleanResult.FluentValidation/CleanResult.FluentValidation.csproj
+        sed -i "s/<PackageReference Include=\"CleanResult\" Version=\"[^\"]*\"[[:space:]]*\/>/<PackageReference Include=\"CleanResult\" Version=\"$VERSION\"\/>/" CleanResult.FluentValidation/CleanResult.FluentValidation.csproj
+        echo "Updated CleanResult.FluentValidation version and dependency to $VERSION"
+
     - name: Commit version updates
       run: |
         VERSION=${{ needs.validate.outputs.version }}
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add CleanResult/CleanResult.csproj CleanResult.WolverineFx/CleanResult.WolverineFx.csproj CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj CleanResult.AspNet/CleanResult.AspNet.csproj
-        
+        git add CleanResult/CleanResult.csproj CleanResult.WolverineFx/CleanResult.WolverineFx.csproj CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj CleanResult.AspNet/CleanResult.AspNet.csproj CleanResult.FluentValidation/CleanResult.FluentValidation.csproj
+
         # Only commit if there are changes
         if ! git diff --cached --quiet; then
           git commit -m "chore: update package versions to $VERSION"
@@ -168,6 +175,7 @@ jobs:
         dotnet pack CleanResult.WolverineFx/CleanResult.WolverineFx.csproj --configuration Release --no-build --output ./nupkg
         dotnet pack CleanResult.Swashbuckle/CleanResult.Swashbuckle.csproj --configuration Release --no-build --output ./nupkg
         dotnet pack CleanResult.AspNet/CleanResult.AspNet.csproj --configuration Release --no-build --output ./nupkg
+        dotnet pack CleanResult.FluentValidation/CleanResult.FluentValidation.csproj --configuration Release --no-build --output ./nupkg
 
     - name: Upload packages as artifacts
       uses: actions/upload-artifact@v4
@@ -208,13 +216,14 @@ jobs:
         release_name: Release ${{ needs.validate.outputs.tag }}
         body: |
           ## CleanResult ${{ needs.validate.outputs.version }}
-          
+
           This release includes the following NuGet packages:
           - CleanResult v${{ needs.validate.outputs.version }}
           - CleanResult.WolverineFx v${{ needs.validate.outputs.version }}
           - CleanResult.Swashbuckle v${{ needs.validate.outputs.version }}
           - CleanResult.AspNet v${{ needs.validate.outputs.version }}
-          
+          - CleanResult.FluentValidation v${{ needs.validate.outputs.version }}
+
           All packages have been published to NuGet.org and are available for download.
         draft: false
         prerelease: false
