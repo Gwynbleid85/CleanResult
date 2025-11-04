@@ -14,12 +14,12 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>CleanResultLogo.png</PackageIcon>
         <RepositoryUrl>https://github.com/Gwynbleid85/CleanResult</RepositoryUrl>
-        <Version>1.2.8</Version>
+        <Version>1.2.9</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CleanResult" Version="1.2.8"/>
+        <PackageReference Include="CleanResult" Version="1.2.9"/>
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.3"/>
     </ItemGroup>
 
