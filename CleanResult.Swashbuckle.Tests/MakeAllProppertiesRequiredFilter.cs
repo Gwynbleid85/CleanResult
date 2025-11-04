@@ -8,6 +8,11 @@ namespace CleanResult.Swashbuckle.Tests;
 /// </summary>
 public class MakeAllPropertiesRequiredFilter : ISchemaFilter
 {
+    /// <summary>
+    /// Applies the filter to make all properties required in the OpenAPI schema.
+    /// </summary>
+    /// <param name="schema">The OpenAPI schema to modify.</param>
+    /// <param name="context">The schema filter context.</param>
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
         if (context.Type != typeof(Error))

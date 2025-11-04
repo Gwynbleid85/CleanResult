@@ -11,23 +11,23 @@ namespace WolverineTests.Handlers;
 public class GenericResultHandler
 {
     // Load method that returns Result<User>
-    public static async Task<Result<User>> LoadAsync(GenericCommand command)
+    public static Task<Result<User>> LoadAsync(GenericCommand command)
     {
         // Find user by ID
         var user = DataStore.Users.FirstOrDefault(u => u.Id == command.Id);
 
         if (user == null)
-            return Result.Error("User not found", 404);
+            return Task.FromResult(Result<User>.Error("User not found", 404));
 
-        return Result.Ok(user);
+        return Task.FromResult(Result.Ok(user));
     }
 
     // Handle method - receives the extracted User from LoadAsync success
-    public static async Task<Result<UserDto>> Handle(GenericCommand command, User user)
+    public static Task<Result<UserDto>> Handle(GenericCommand command, User user)
     {
         // Transform entity to DTO
         var userDto = new UserDto(user.Id, user.Name, user.Email);
 
-        return Result.Ok(userDto);
+        return Task.FromResult(Result.Ok(userDto));
     }
 }

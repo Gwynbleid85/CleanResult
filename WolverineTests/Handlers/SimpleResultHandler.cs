@@ -9,24 +9,24 @@ namespace WolverineTests.Handlers;
 public class SimpleResultHandler
 {
     // Load method that returns simple Result
-    public static async Task<Result> LoadAsync(SimpleCommand command)
+    public static Task<Result> LoadAsync(SimpleCommand command)
     {
         // Simulate validation - fail for negative IDs
         if (command.Id < 0)
-            return Result.Error("Invalid ID", 400);
+            return Task.FromResult(Result.Error("Invalid ID", 400));
 
         // Simulate not found - fail for ID = 999
         if (command.Id == 999)
-            return Result.Error("Entity not found", 404);
+            return Task.FromResult(Result.Error("Entity not found", 404));
 
         // Success case
-        return Result.Ok();
+        return Task.FromResult(Result.Ok());
     }
 
     // Handle method - gets called only if LoadAsync succeeds
-    public static async Task<Result<string>> Handle(SimpleCommand command)
+    public static Task<Result<string>> Handle(SimpleCommand command)
     {
         // This will only execute if LoadAsync returned success
-        return Result.Ok($"Processed command with ID: {command.Id}");
+        return Task.FromResult(Result.Ok($"Processed command with ID: {command.Id}"));
     }
 }

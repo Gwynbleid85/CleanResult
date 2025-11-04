@@ -11,24 +11,24 @@ namespace WolverineTests.Handlers;
 public class TupleResultHandler
 {
     // Load method that returns Result with tuple of (User, Product)
-    public static async Task<Result<(User user, Product product)>> LoadAsync(TupleCommand command)
+    public static Task<Result<(User user, Product product)>> LoadAsync(TupleCommand command)
     {
         // Find user and product by ID (using same ID for simplicity)
         var user = DataStore.Users.FirstOrDefault(u => u.Id == command.Id);
         var product = DataStore.Products.FirstOrDefault(p => p.Id == command.Id);
 
         if (user == null)
-            return Result<(User, Product)>.Error("User not found", 404);
+            return Task.FromResult(Result<(User, Product)>.Error("User not found", 404));
 
         if (product == null)
-            return Result<(User, Product)>.Error("Product not found", 404);
+            return Task.FromResult(Result<(User, Product)>.Error("Product not found", 404));
 
-        return Result.Ok((user, product));
+        return Task.FromResult(Result.Ok((user, product)));
     }
 
     // Handle method - should receive extracted tuple items as separate parameters
     // The continuation strategy should extract tuple.Item1 and tuple.Item2
-    public static async Task<Result<OrderDto>> Handle(TupleCommand command,
+    public static Task<Result<OrderDto>> Handle(TupleCommand command,
         (User user, Product product) loadAsyncSuccessValue)
     {
         // Create order DTO from the extracted user and product
@@ -39,7 +39,7 @@ public class TupleResultHandler
             1
         );
 
-        return Result.Ok(orderDto);
+        return Task.FromResult(Result.Ok(orderDto));
     }
 }
 
