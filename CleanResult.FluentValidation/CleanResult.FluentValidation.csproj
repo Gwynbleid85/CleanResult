@@ -4,12 +4,12 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Title>CleanResult.AspNet</Title>
+        <Title>CleanResult.FluentValidation</Title>
         <Authors>Gwynbleid85</Authors>
-        <Description>Extension of CleanResult for creating IActionResult from Result.</Description>
+        <Description>Extension of CleanResult for FluentValidation integration.</Description>
         <PackageProjectUrl>https://github.com/Gwynbleid85/CleanResult</PackageProjectUrl>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
-        <PackageTags>result error success aspnet OpenApi</PackageTags>
+        <PackageTags>result error success fluentvalidation validation</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>CleanResultLogo.png</PackageIcon>
         <RepositoryUrl>https://github.com/Gwynbleid85/CleanResult</RepositoryUrl>
@@ -19,6 +19,7 @@
 
     <ItemGroup>
         <PackageReference Include="CleanResult" Version="1.2.8"/>
+        <PackageReference Include="FluentValidation" Version="11.9.0"/>
     </ItemGroup>
 
     <ItemGroup>
