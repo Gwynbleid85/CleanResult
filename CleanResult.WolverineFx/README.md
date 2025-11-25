@@ -25,8 +25,10 @@ dotnet add package CleanResult.WolverineFx
 
 **Requirements:**
 
-- .NET 8.0, 9.0, or 10.0
+- .NET 8.0 or 9.0
 - WolverineFx 3.0+
+
+> **Note:** .NET 10.0 support is pending WolverineFx compatibility updates.
 
 ---
 
