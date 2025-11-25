@@ -60,7 +60,12 @@ jobs:
       run: dotnet build CleanResult.sln --configuration Release --no-restore
 
     - name: Run all tests for .NET ${{ matrix.dotnet-version }}
-      run: dotnet test CleanResult.sln --no-build --configuration Release
+      run: |
+        FRAMEWORK="net${{ matrix.dotnet-version == '8.x' && '8.0' || matrix.dotnet-version == '9.x' && '9.0' || '10.0' }}"
+        echo "Running tests for framework: $FRAMEWORK"
+        dotnet test Tests/Tests.csproj --no-build --configuration Release --framework $FRAMEWORK
+        dotnet test CleanResult.FluentValidation.Tests/CleanResult.FluentValidation.Tests.csproj --no-build --configuration Release --framework $FRAMEWORK
+        dotnet test WolverineTests/WolverineTests.csproj --no-build --configuration Release --framework $FRAMEWORK
 
   # FR3: Version Management
   update-versions:
