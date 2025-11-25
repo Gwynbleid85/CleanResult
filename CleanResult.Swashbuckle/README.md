@@ -1,6 +1,6 @@
 # CleanResult.Swashbuckle
 
-![CleanResult](https://github.com/Gwynbleid85/CleanResult/blob/master/docs/readme-header.png?raw=true)
+![CleanResult](https://raw.githubusercontent.com/Gwynbleid85/CleanResult/refs/heads/master/docs/readme-header.png)
 
 <div align="center">
 
@@ -25,7 +25,7 @@ dotnet add package CleanResult.Swashbuckle
 
 **Requirements:**
 
-- .NET 8.0 or later
+- .NET 8.0, 9.0, or 10.0
 - CleanResult 1.2.8+
 - Swashbuckle.AspNetCore 6.0+
 

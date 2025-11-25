@@ -1,14 +1,14 @@
 # CleanResult
 
-![CleanResult](https://github.com/Gwynbleid85/CleanResult/blob/master/docs/readme-header.png?raw=true)
+![CleanResult](https://raw.githubusercontent.com/Gwynbleid85/CleanResult/refs/heads/master/docs/readme-header.png)
 
 <div align="center">
 
 [![NuGet](https://img.shields.io/nuget/v/CleanResult.svg)](https://www.nuget.org/packages/CleanResult/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![.NET](https://img.shields.io/badge/.NET-8.0-purple.svg)](https://dotnet.microsoft.com/download)
+[![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%209.0%20%7C%2010.0-purple.svg)](https://dotnet.microsoft.com/download)
 
-**A clean, Rust-inspired Result type implementation for .NET 8.0**
+**A clean, Rust-inspired Result type implementation for .NET 8.0, 9.0, and 10.0**
 
 Brings functional error handling to C# with built-in ASP.NET Core integration and RFC 9457 compliance
 

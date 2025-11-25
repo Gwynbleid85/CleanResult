@@ -1,6 +1,6 @@
 # CleanResult.AspNet
 
-![CleanResult](https://github.com/Gwynbleid85/CleanResult/blob/master/docs/readme-header.png?raw=true)
+![CleanResult](https://raw.githubusercontent.com/Gwynbleid85/CleanResult/refs/heads/master/docs/readme-header.png)
 
 <div align="center">
 
@@ -25,7 +25,7 @@ dotnet add package CleanResult.AspNet
 
 **Requirements:**
 
-- .NET 8.0 or later
+- .NET 8.0, 9.0, or 10.0
 - ASP.NET Core 8.0+
 
 ---
