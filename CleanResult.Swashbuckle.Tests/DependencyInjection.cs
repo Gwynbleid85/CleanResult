@@ -19,8 +19,7 @@ public static class DependencyInjection
     /// <returns></returns>
     public static IHostBuilder AddProjects(this IHostBuilder host, string[] assemblies)
     {
-        host.UseWolverine(opts =>
-        {
+        host.UseWolverine(opts => {
             foreach (var assembly in assemblies)
                 opts.Discovery.IncludeAssembly(Assembly.Load(assembly));
 
@@ -42,14 +41,13 @@ public static class DependencyInjection
     public static IServiceCollection AddSwagger(this IServiceCollection services, string title,
         string[] assemblies)
     {
-        services.AddSwaggerGen(options =>
-        {
+        services.AddSwaggerGen(options => {
             // Configure basic swagger info 
             options.SwaggerDoc("v1", new OpenApiInfo
             {
                 Title = title,
                 Version = "v1",
-                Description = "CleanIAM API"
+                Description = "CleanResult API"
             });
 
             // Add xml comments from all assemblies to swagger
