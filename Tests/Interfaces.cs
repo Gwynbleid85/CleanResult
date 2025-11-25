@@ -28,9 +28,9 @@ public class Interfaces
 
         await okResult.ExecuteAsync(httpContext);
         Assert.Equal(StatusCodes.Status200OK, httpContext.Response.StatusCode);
-        Assert.Equal("application/json", httpContext.Response.ContentType);
+        Assert.Equal("text/plain; charset=utf-8", httpContext.Response.ContentType);
         var bodyText = HttpContextUtils.ReadContextBody(httpContext);
-        Assert.Equal("\"Success\"", bodyText);
+        Assert.Equal("Success", bodyText);
     }
 
     [Fact]
@@ -42,7 +42,7 @@ public class Interfaces
 
         await okResult.ExecuteAsync(httpContext);
         Assert.Equal(StatusCodes.Status200OK, httpContext.Response.StatusCode);
-        Assert.Equal("application/json", httpContext.Response.ContentType);
+        Assert.Equal("application/json; charset=utf-8", httpContext.Response.ContentType);
         var bodyText = HttpContextUtils.ReadContextBody(httpContext);
         Assert.Equal("""{"name":"Test","value":42,"compound":{"nested":"Value"}}""", bodyText);
     }

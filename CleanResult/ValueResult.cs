@@ -52,12 +52,40 @@ public class Result<T> : IResult
         if (IsOk())
         {
             httpContext.Response.StatusCode = StatusCodes.Status200OK;
-            httpContext.Response.ContentType = "application/json";
-            await httpContext.Response.WriteAsync(JsonSerializer.Serialize(Value,
-                new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                }));
+            httpContext.Response.ContentType = ContentTypeResolver.GetContentType<T>();
+
+            // Handle different types appropriately
+            switch (Value)
+            {
+                case string stringValue:
+                    await httpContext.Response.WriteAsync(stringValue);
+                    break;
+
+                case byte[] byteArray:
+                    await httpContext.Response.Body.WriteAsync(byteArray, 0, byteArray.Length);
+                    break;
+
+                case Stream stream:
+                    await stream.CopyToAsync(httpContext.Response.Body);
+                    break;
+
+                default:
+                    if (ContentTypeResolver.ShouldSerializeAsJson<T>())
+                    {
+                        await httpContext.Response.WriteAsync(JsonSerializer.Serialize(Value,
+                            new JsonSerializerOptions
+                            {
+                                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                            }));
+                    }
+                    else
+                    {
+                        // Fallback to ToString() for other types
+                        await httpContext.Response.WriteAsync(Value?.ToString() ?? string.Empty);
+                    }
+                    break;
+            }
+
             return;
         }
 

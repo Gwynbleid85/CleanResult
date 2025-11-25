@@ -18,4 +18,12 @@ public class HttpContextUtils
         using var reader = new StreamReader(httpContext.Response.Body);
         return reader.ReadToEnd();
     }
+
+    public static byte[] ReadContextBodyAsBytes(HttpContext httpContext)
+    {
+        httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var memoryStream = new MemoryStream();
+        httpContext.Response.Body.CopyTo(memoryStream);
+        return memoryStream.ToArray();
+    }
 }
