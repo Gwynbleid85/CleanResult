@@ -8,6 +8,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%209.0%20%7C%2010.0-purple.svg)](https://dotnet.microsoft.com/download)
 
+[![Build](https://img.shields.io/github/actions/workflow/status/Gwynbleid85/CleanResult/publish.yml?logo=github&label=build)](https://github.com/Gwynbleid85/CleanResult/actions/workflows/publish.yml)
+[![Testing](https://img.shields.io/github/actions/workflow/status/Gwynbleid85/CleanResult/publish.yml?logo=github&label=testing)](https://github.com/Gwynbleid85/CleanResult/actions/workflows/publish.yml)
+
 **A clean, Rust-inspired Result type implementation for .NET 8.0, 9.0, and 10.0**
 
 Brings functional error handling to C# with built-in ASP.NET Core integration and RFC 9457 compliance
