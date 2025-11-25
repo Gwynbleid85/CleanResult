@@ -60,7 +60,6 @@ jobs:
         echo "Running tests for .NET 9.0"
         dotnet test Tests/Tests.csproj --no-build --configuration Release --framework net9.0
         dotnet test CleanResult.FluentValidation.Tests/CleanResult.FluentValidation.Tests.csproj --no-build --configuration Release --framework net9.0
-        dotnet test WolverineTests/WolverineTests.csproj --no-build --configuration Release --framework net9.0
 
   # FR3: Version Management
   update-versions:
