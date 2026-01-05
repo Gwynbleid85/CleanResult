@@ -11,7 +11,7 @@
     <ItemGroup>
         <PackageReference Include="WolverineFx" Version="4.7.0"/>
         <PackageReference Include="WolverineFx.Http" Version="4.7.0"/>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -20,7 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="app.log" />
+        <None Remove="app.log"/>
     </ItemGroup>
 
 </Project>

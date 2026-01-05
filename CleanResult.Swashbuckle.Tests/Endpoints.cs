@@ -58,4 +58,29 @@ public class Endpoints
     {
         return Result.Error("Custom error code", 1234);
     }
+
+
+    /// <summary>
+    /// Returns a nullable custom response.
+    /// </summary>
+    /// <returns></returns>
+    [WolverineGet("/nullable-test")]
+    public static Result<CustomResponse?> Index5()
+    {
+        return Result.Ok<CustomResponse?>(null);
+    }
+
+    [WolverineGet("/nullable-test2")]
+    public static Result<NullableResponse> Index6()
+    {
+        return new Result<NullableResponse>();
+    }
+
+    public class NullableResponse
+    {
+        public required CustomResponse Data1 { get; set; }
+        public CustomResponse Data2 { get; set; }
+        public required CustomResponse? Data3 { get; set; }
+        public CustomResponse? Data4 { get; set; }
+    }
 }

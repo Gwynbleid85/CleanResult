@@ -1,6 +1,6 @@
 using System.Reflection;
 using CleanResult.WolverineFx;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Wolverine;
 using Wolverine.Middleware;
 
@@ -50,7 +50,7 @@ public static class DependencyInjection
                 Description = "CleanResult API"
             });
 
-            // Add xml comments from all assemblies to swagger
+            // Add XML comments from all assemblies to swagger
             foreach (var assembly in assemblies)
             {
                 var assemblyXmlPath = Path.Combine(AppContext.BaseDirectory, $"{assembly}.xml");

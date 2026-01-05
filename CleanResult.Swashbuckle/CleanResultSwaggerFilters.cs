@@ -1,8 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace CleanResult.Swashbuckle;
+
+internal static class Constants
+{
+    public const string ToDeleteSchemaName = "SchemaToDelete";
+}
 
 /// <summary>
 /// This filter modifies the OpenAPI operation responses to use CleanResult types.
@@ -17,8 +22,8 @@ internal class CleanResultReturnTypeFilter : IOperationFilter
 
         if (returnType == typeof(Result))
         {
-            operation.Responses.Remove("200");
-            operation.Responses.Add("204", new OpenApiResponse
+            operation.Responses?.Remove("200");
+            operation.Responses?.Add("204", new OpenApiResponse
             {
                 Description = "Success",
                 Content = null
@@ -28,8 +33,8 @@ internal class CleanResultReturnTypeFilter : IOperationFilter
         if (returnType.IsGenericType &&
             returnType.GetGenericTypeDefinition() == typeof(Result<>))
         {
-            operation.Responses.Remove("200");
-            operation.Responses.Add("200", new OpenApiResponse
+            operation.Responses?.Remove("200");
+            operation.Responses?.Add("200", new OpenApiResponse
             {
                 Description = "Success",
                 Content = new Dictionary<string, OpenApiMediaType>
@@ -46,27 +51,39 @@ internal class CleanResultReturnTypeFilter : IOperationFilter
 }
 
 /// <summary>
-/// This filter marks the schemas that are generated CleanResult with "SchemaToDelete" title.
+/// This filter tracks CleanResult schemas that should be removed from the OpenAPI document.
 /// </summary>
 internal class CleanResultSchemaFilter : ISchemaFilter
 {
-    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
     {
         if (context.Type == typeof(Result) ||
-            (context.Type.IsGenericType && context.Type.GetGenericTypeDefinition() == typeof(Result<>)))
-            schema.Title = "SchemaToDelete";
+            context.Type.IsGenericType && context.Type.GetGenericTypeDefinition() == typeof(Result<>))
+        {
+            if (schema is OpenApiSchema parsedSchema)
+            {
+                parsedSchema.Title = Constants.ToDeleteSchemaName;
+            }
+            else
+            {
+                Console.WriteLine("Warning: Unable to cast schema to OpenApiSchema for type " + context.Type.FullName);
+            }
+        }
     }
 }
 
 /// <summary>
-/// This filter removes the schemas that are marked with "SchemaToDelete" title form the OpenAPI document.
+/// This filter removes CleanResult schemas from the OpenAPI document.
 /// </summary>
 internal class CleanResultReturnDocumentFilter : IDocumentFilter
 {
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
+        if (swaggerDoc.Components?.Schemas is null)
+            return;
+
         var keysToRemove = swaggerDoc.Components.Schemas
-            .Where(kvp => kvp.Value.Title == "SchemaToDelete")
+            .Where(kvp => kvp.Value.Title == Constants.ToDeleteSchemaName)
             .Select(kvp => kvp.Key)
             .ToList();
 

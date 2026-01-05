@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace CleanResult.Swashbuckle.Tests;
@@ -13,9 +13,9 @@ public class MakeAllPropertiesRequiredFilter : ISchemaFilter
     /// </summary>
     /// <param name="schema">The OpenAPI schema to modify.</param>
     /// <param name="context">The schema filter context.</param>
-    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
     {
-        if (context.Type != typeof(Error))
-            schema.Required = schema.Properties.Keys.ToHashSet();
+        if (context.Type != typeof(Error) && schema is OpenApiSchema openApiSchema)
+            openApiSchema.Required = openApiSchema.Properties?.Keys.ToHashSet();
     }
 }
