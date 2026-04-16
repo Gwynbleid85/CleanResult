@@ -59,7 +59,6 @@ public class Endpoints
         return Result.Error("Custom error code", 1234);
     }
 
-
     /// <summary>
     /// Returns a nullable custom response.
     /// </summary>
@@ -68,6 +67,13 @@ public class Endpoints
     public static Result<CustomResponse?> Index5()
     {
         return Result.Ok<CustomResponse?>(null);
+    }
+
+    [WolverineGet("/stream")]
+    public static Result<Stream> Stream()
+    {
+        Stream stream = File.OpenRead("Endpoints.cs");
+        return Result.Ok(stream);
     }
 
     [WolverineGet("/nullable-test2")]

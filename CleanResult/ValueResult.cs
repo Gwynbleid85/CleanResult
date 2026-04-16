@@ -19,6 +19,10 @@ public class Result<T> : IResult
     internal T? SuccessValue { get; set; }
 
     [JsonInclude]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    internal int? SuccessStatus { get; init; }
+
+    [JsonInclude]
     [JsonPropertyName("ErrorValue")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     internal Error? InternalErrorValue { get; init; }
@@ -51,7 +55,7 @@ public class Result<T> : IResult
     {
         if (IsOk())
         {
-            httpContext.Response.StatusCode = StatusCodes.Status200OK;
+            httpContext.Response.StatusCode = SuccessStatus ?? StatusCodes.Status200OK;
             httpContext.Response.ContentType = ContentTypeResolver.GetContentType<T>();
 
             // Handle different types appropriately
@@ -140,6 +144,28 @@ public class Result<T> : IResult
     public static Result<T> Ok(T value)
     {
         return new Result<T> { Success = true, SuccessValue = value };
+    }
+
+    /// <summary>
+    /// Creates a new Result object representing success with a custom HTTP status code.
+    /// </summary>
+    /// <param name="value">Value of the success</param>
+    /// <param name="statusCode">The HTTP status code returned by <see cref="ExecuteAsync"/></param>
+    /// <returns>Result object representing success</returns>
+    public static Result<T> Ok(T value, int statusCode)
+    {
+        return new Result<T> { Success = true, SuccessValue = value, SuccessStatus = statusCode };
+    }
+
+    /// <summary>
+    /// Creates a new Result object representing success with a custom HTTP status code.
+    /// </summary>
+    /// <param name="value">Value of the success</param>
+    /// <param name="statusCode">The HTTP status code returned by <see cref="ExecuteAsync"/></param>
+    /// <returns>Result object representing success</returns>
+    public static Result<T> Ok(T value, HttpStatusCode statusCode)
+    {
+        return Ok(value, (int)statusCode);
     }
 
     /// <summary>

@@ -1,3 +1,4 @@
+using System.Net;
 using CleanResult;
 using Microsoft.AspNetCore.Http;
 using Tests.Utils;
@@ -45,6 +46,68 @@ public class Interfaces
         Assert.Equal("application/json; charset=utf-8", httpContext.Response.ContentType);
         var bodyText = HttpContextUtils.ReadContextBody(httpContext);
         Assert.Equal("""{"name":"Test","value":42,"compound":{"nested":"Value"}}""", bodyText);
+    }
+
+    [Fact]
+    public async Task ResultInterfaceMethodsWithCustomSuccessStatusNoBody()
+    {
+        var acceptedResult = Result.Ok(HttpStatusCode.Accepted);
+
+        var httpContext = HttpContextUtils.GetHttpContext();
+
+        await acceptedResult.ExecuteAsync(httpContext);
+        Assert.Equal(StatusCodes.Status202Accepted, httpContext.Response.StatusCode);
+        Assert.Equal("application/json", httpContext.Response.ContentType);
+        Assert.Empty(HttpContextUtils.ReadContextBody(httpContext));
+    }
+
+    [Fact]
+    public async Task ResultInterfaceMethodsWithCustomSuccessStatusAndSimpleValue()
+    {
+        var okResult = Result.Ok("Created", StatusCodes.Status201Created);
+
+        var httpContext = HttpContextUtils.GetHttpContext();
+
+        await okResult.ExecuteAsync(httpContext);
+        Assert.Equal(StatusCodes.Status201Created, httpContext.Response.StatusCode);
+        Assert.Equal("text/plain; charset=utf-8", httpContext.Response.ContentType);
+        Assert.Equal("Created", HttpContextUtils.ReadContextBody(httpContext));
+    }
+
+    [Fact]
+    public async Task ResultInterfaceMethodsWithCustomSuccessStatusAndComplexValue()
+    {
+        var okResult = Result.Ok(new { Name = "Test", Value = 42 }, HttpStatusCode.Created);
+
+        var httpContext = HttpContextUtils.GetHttpContext();
+
+        await okResult.ExecuteAsync(httpContext);
+        Assert.Equal(StatusCodes.Status201Created, httpContext.Response.StatusCode);
+        Assert.Equal("application/json; charset=utf-8", httpContext.Response.ContentType);
+        Assert.Equal("""{"name":"Test","value":42}""", HttpContextUtils.ReadContextBody(httpContext));
+    }
+
+    [Fact]
+    public void ResultOkWithIntValueStillReturnsGenericResult()
+    {
+        // Regression guard: ensure `Result.Ok(42)` resolves to Result<int>.Ok(42),
+        // not accidentally to an overload that would treat 42 as a status code.
+        var result = Result.Ok(42);
+        Assert.IsType<Result<int>>(result);
+        Assert.True(result.IsOk());
+        Assert.Equal(42, result.Value);
+    }
+
+    [Fact]
+    public async Task ResultOkWithIntValueAndStatusCode()
+    {
+        var okResult = Result.Ok(42, StatusCodes.Status201Created);
+
+        var httpContext = HttpContextUtils.GetHttpContext();
+
+        await okResult.ExecuteAsync(httpContext);
+        Assert.Equal(StatusCodes.Status201Created, httpContext.Response.StatusCode);
+        Assert.Equal("42", HttpContextUtils.ReadContextBody(httpContext));
     }
 
     [Fact]

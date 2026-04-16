@@ -15,6 +15,10 @@ public class Result : IResult
     internal bool Success { get; set; }
 
     [JsonInclude]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    internal int? SuccessStatus { get; init; }
+
+    [JsonInclude]
     [JsonPropertyName("ErrorValue")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     internal Error? InternalErrorValue { get; init; }
@@ -37,7 +41,7 @@ public class Result : IResult
         if (IsOk())
         {
             httpContext.Response.ContentType = "application/json";
-            httpContext.Response.StatusCode = StatusCodes.Status204NoContent;
+            httpContext.Response.StatusCode = SuccessStatus ?? StatusCodes.Status204NoContent;
             return;
         }
 
@@ -58,6 +62,21 @@ public class Result : IResult
     }
 
     /// <summary>
+    /// Creates a new Result object representing success with a custom HTTP status code and no body.
+    /// </summary>
+    /// <param name="statusCode">The HTTP status code returned by <see cref="ExecuteAsync"/></param>
+    /// <returns>Result object representing success</returns>
+    /// <remarks>
+    /// A single-argument <c>Ok(int)</c> overload is intentionally not provided because it would
+    /// collide with the generic <see cref="Ok{T}(T)"/> forwarder and silently reroute
+    /// <c>Result.Ok(42)</c> to the no-body overload.
+    /// </remarks>
+    public static Result Ok(HttpStatusCode statusCode)
+    {
+        return new Result { Success = true, SuccessStatus = (int)statusCode };
+    }
+
+    /// <summary>
     /// Helper function to automatically infer generics type with explicitly specifying it
     /// </summary>
     /// <param name="value">Value of the success</param>
@@ -66,6 +85,30 @@ public class Result : IResult
     public static Result<T> Ok<T>(T value)
     {
         return Result<T>.Ok(value);
+    }
+
+    /// <summary>
+    /// Creates a new generics Result object representing success with a custom HTTP status code.
+    /// </summary>
+    /// <param name="value">Value of the success</param>
+    /// <param name="statusCode">The HTTP status code returned by <see cref="Result{T}.ExecuteAsync"/></param>
+    /// <typeparam name="T">Type for the generics Result</typeparam>
+    /// <returns>Result object representing success</returns>
+    public static Result<T> Ok<T>(T value, int statusCode)
+    {
+        return Result<T>.Ok(value, statusCode);
+    }
+
+    /// <summary>
+    /// Creates a new generics Result object representing success with a custom HTTP status code.
+    /// </summary>
+    /// <param name="value">Value of the success</param>
+    /// <param name="statusCode">The HTTP status code returned by <see cref="Result{T}.ExecuteAsync"/></param>
+    /// <typeparam name="T">Type for the generics Result</typeparam>
+    /// <returns>Result object representing success</returns>
+    public static Result<T> Ok<T>(T value, HttpStatusCode statusCode)
+    {
+        return Result<T>.Ok(value, statusCode);
     }
 
     /// <summary>
