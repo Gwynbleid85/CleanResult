@@ -28,3 +28,8 @@ app.MapControllers();
 app.MapWolverineEndpoints();
 
 app.Run();
+
+/// <summary>
+/// Exposes the test application's entry point to integration tests.
+/// </summary>
+public partial class Program;

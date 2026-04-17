@@ -15,7 +15,14 @@ public class MakeAllPropertiesRequiredFilter : ISchemaFilter
     /// <param name="context">The schema filter context.</param>
     public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
     {
-        if (context.Type != typeof(Error) && schema is OpenApiSchema openApiSchema)
-            openApiSchema.Required = openApiSchema.Properties?.Keys.ToHashSet();
+        if (context.Type != typeof(Error))
+        {
+            switch (schema)
+            {
+                case OpenApiSchema openApiSchema:
+                    openApiSchema.Required = openApiSchema.Properties?.Keys.ToHashSet();
+                    break;
+            }
+        }
     }
 }

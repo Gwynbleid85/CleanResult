@@ -60,13 +60,14 @@ internal class CleanResultSchemaFilter : ISchemaFilter
         if (context.Type == typeof(Result) ||
             context.Type.IsGenericType && context.Type.GetGenericTypeDefinition() == typeof(Result<>))
         {
-            if (schema is OpenApiSchema parsedSchema)
+            switch (schema)
             {
-                parsedSchema.Title = Constants.ToDeleteSchemaName;
-            }
-            else
-            {
-                Console.WriteLine("Warning: Unable to cast schema to OpenApiSchema for type " + context.Type.FullName);
+                case OpenApiSchema openApiSchema:
+                    openApiSchema.Title = Constants.ToDeleteSchemaName;
+                    break;
+                case OpenApiSchemaReference openApiSchemaReference:
+                    openApiSchemaReference.Title = Constants.ToDeleteSchemaName;
+                    break;
             }
         }
     }

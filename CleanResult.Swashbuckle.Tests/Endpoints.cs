@@ -82,6 +82,15 @@ public class Endpoints
         return new Result<NullableResponse>();
     }
 
+    /// <summary>
+    /// Returns a success result with no body.
+    /// </summary>
+    [WolverineGet("/no-content")]
+    public static Result Index7()
+    {
+        return Result.Ok();
+    }
+
     public class NullableResponse
     {
         public required CustomResponse Data1 { get; set; }
