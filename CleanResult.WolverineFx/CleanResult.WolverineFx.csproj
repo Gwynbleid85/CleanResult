@@ -1,31 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Title>CleanResult</Title>
+    <Authors>Gwynbleid85</Authors>
+    <Description>Extension of CleanResult for WolverineFx.</Description>
+    <PackageProjectUrl>https://github.com/Gwynbleid85/CleanResult</PackageProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageTags>result error success aspnet</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>CleanResultLogo.png</PackageIcon>
+    <RepositoryUrl>https://github.com/Gwynbleid85/CleanResult</RepositoryUrl>
+    <Version>1.4.0</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
 
-    <PropertyGroup>
-        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <Title>CleanResult</Title>
-        <Authors>Gwynbleid85</Authors>
-        <Description>Extension of CleanResult for WolverineFx.</Description>
-        <PackageProjectUrl>https://github.com/Gwynbleid85/CleanResult</PackageProjectUrl>
-        <PackageLicenseFile>LICENSE</PackageLicenseFile>
-        <PackageTags>result error success aspnet</PackageTags>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageIcon>CleanResultLogo.png</PackageIcon>
-        <RepositoryUrl>https://github.com/Gwynbleid85/CleanResult</RepositoryUrl>
-        <Version>1.4.0</Version>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CleanResult" Version="1.4.0" />
+    <PackageReference Include="WolverineFx" Version="5.31.1" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="CleanResult" Version="1.4.0"/>
-        <PackageReference Include="WolverineFx" Version="4.5.2"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="../LICENSE" Pack="true" PackagePath=""/>
-        <None Include="README.md" Pack="true" PackagePath=""/>
-        <None Include="../docs/CleanResultLogo.png" Pack="true" PackagePath=""/>
-    </ItemGroup>
-
+  <ItemGroup>
+    <None Include="../LICENSE" Pack="true" PackagePath="" />
+    <None Include="README.md" Pack="true" PackagePath="" />
+    <None Include="../docs/CleanResultLogo.png" Pack="true" PackagePath="" />
+  </ItemGroup>
 </Project>

@@ -31,6 +31,7 @@ Brings functional error handling to C# with built-in ASP.NET Core integration an
   propagation
 - 🌐 **ASP.NET Core Integration** - Direct `IResult` implementation for seamless web API integration
 - 📜 **RFC 9457 Compliant** - Full Problem Details specification support
+- ✅ **Custom Success Status Codes** - Return `201 Created`, `202 Accepted`, and other success codes without leaving the `Result` API
 - 🎯 **Smart Content-Type Detection** - Automatically sets correct Content-Type based on return type
 - 🪶 **Zero Dependencies** - Lightweight library with minimal overhead
 - ⚡ **High Performance** - No reflection, optimized for speed
@@ -64,6 +65,12 @@ CleanResult offers specialized extensions for popular frameworks:
 
 ## 🚀 Quick Start
 
+### What's New in 1.4.0
+
+- Custom success status codes for `Result` and `Result<T>`
+- New overloads for returning success values with `int` or `HttpStatusCode`
+- Safer overload design so `Result.Ok(42)` still returns `Result<int>`, not a status-only result
+
 ### Installation
 
 ```bash
@@ -80,6 +87,10 @@ Result simpleSuccess = Result.Ok();
 
 // ✅ Success with value
 Result<User> userResult = Result.Ok(new User { Name = "John" });
+
+// ✅ Success with a custom status code
+Result accepted = Result.Ok(HttpStatusCode.Accepted);
+Result<User> createdUser = Result.Ok(new User { Name = "John" }, HttpStatusCode.Created);
 
 // ❌ Error with message and HTTP status
 Result error = Result.Error("User not found", 404);
@@ -110,7 +121,7 @@ public class UsersController : Controller
             return Result.Error("Email is required", 400);
 
         _userService.Create(user);
-        return Result.Ok();  // Returns HTTP 204 No Content
+        return Result.Ok(HttpStatusCode.Created);  // Returns HTTP 201 with no body
     }
 }
 ```
@@ -137,6 +148,11 @@ public Result<XDocument> GetXml()
 [HttpGet("data")]
 public Result<User> GetData()
     => Result.Ok(user);  // Content-Type: application/json
+
+// ✅ Custom success code with body
+[HttpPost("users")]
+public Result<User> CreateUser([FromBody] User user)
+    => Result.Ok(user, StatusCodes.Status201Created);
 ```
 
 ---
@@ -155,7 +171,7 @@ public class UserService
         var user = _repository.FindById(id);
 
         if (user == null)
-            return Resul.Error("User not found", HttpStatusCode.NotFound);
+            return Result.Error("User not found", HttpStatusCode.NotFound);
 
         return Result.Ok(user);
     }
@@ -253,6 +269,10 @@ public class FileService
 ```csharp
 // Factory Methods
 Result.Ok()                                          // Success without value
+Result.Ok(HttpStatusCode statusCode)                 // Success without value and custom status
+Result.Ok<T>(T value)                                // Success with value
+Result.Ok<T>(T value, int statusCode)                // Success with value and custom status
+Result.Ok<T>(T value, HttpStatusCode statusCode)     // Success with value and custom status
 Result.Error(string title)                           // Error with title
 Result.Error(string title, int status)               // Error with status code
 Result.Error(string title, HttpStatusCode status)    // Error with HTTP status
@@ -272,6 +292,8 @@ Error ErrorValue                                     // Get error (throws if Ok)
 ```csharp
 // Factory Methods
 Result<T>.Ok(T value)                                // Success with value
+Result<T>.Ok(T value, int statusCode)                // Success with value and custom status
+Result<T>.Ok(T value, HttpStatusCode statusCode)     // Success with value and custom status
 Result<T>.Error(string title)                        // Error with title
 Result<T>.Error(string title, int status)            // Error with status code
 Result<T>.Error(string title, HttpStatusCode status) // Error with HTTP status
@@ -303,13 +325,16 @@ public struct Error
 
 ### HTTP Response Behavior
 
-| Result                      | HTTP Status    | Content-Type             | Body            |
-|-----------------------------|----------------|--------------------------|-----------------|
-| `Result.Ok()`               | 204 No Content | application/json         | Empty           |
-| `Result<string>.Ok("text")` | 200 OK         | text/plain               | Raw string      |
-| `Result<User>.Ok(user)`     | 200 OK         | application/json         | JSON object     |
-| `Result<byte[]>.Ok(data)`   | 200 OK         | application/octet-stream | Binary data     |
-| `Result.Error("msg", 404)`  | 404 Not Found  | application/json         | Problem Details |
+| Result                                            | HTTP Status    | Content-Type             | Body            |
+|---------------------------------------------------|----------------|--------------------------|-----------------|
+| `Result.Ok()`                                     | 204 No Content | application/json         | Empty           |
+| `Result.Ok(HttpStatusCode.Accepted)`              | 202 Accepted   | application/json         | Empty           |
+| `Result<string>.Ok("text")`                       | 200 OK         | text/plain               | Raw string      |
+| `Result.Ok("created", StatusCodes.Status201Created)` | 201 Created | text/plain               | Raw string      |
+| `Result<User>.Ok(user)`                           | 200 OK         | application/json         | JSON object     |
+| `Result.Ok(user, HttpStatusCode.Created)`         | 201 Created    | application/json         | JSON object     |
+| `Result<byte[]>.Ok(data)`                         | 200 OK         | application/octet-stream | Binary data     |
+| `Result.Error("msg", 404)`                        | 404 Not Found  | application/json         | Problem Details |
 
 **Error Response (RFC 9457):**
 
@@ -348,6 +373,9 @@ if (result.IsOk())
 
 // ✅ Use HTTP status codes for web APIs
 return Result.Error("Unauthorized", HttpStatusCode.Unauthorized);
+
+// ✅ Return explicit success codes when endpoint semantics require them
+return Result.Ok(order, HttpStatusCode.Created);
 ```
 
 ### ❌ Don'ts

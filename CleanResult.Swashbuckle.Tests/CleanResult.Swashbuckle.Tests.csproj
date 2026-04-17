@@ -1,26 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
 
-    <PropertyGroup>
-        <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  <ItemGroup>
+    <PackageReference Include="WolverineFx" Version="5.31.1" />
+    <PackageReference Include="WolverineFx.Http" Version="5.31.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+  </ItemGroup>
 
-    </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CleanResult.Swashbuckle\CleanResult.Swashbuckle.csproj" />
+    <ProjectReference Include="..\CleanResult.WolverineFx\CleanResult.WolverineFx.csproj" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="WolverineFx" Version="4.7.0"/>
-        <PackageReference Include="WolverineFx.Http" Version="4.7.0"/>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\CleanResult.Swashbuckle\CleanResult.Swashbuckle.csproj"/>
-        <ProjectReference Include="..\CleanResult.WolverineFx\CleanResult.WolverineFx.csproj"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Remove="app.log"/>
-    </ItemGroup>
-
+  <ItemGroup>
+    <None Remove="app.log" />
+  </ItemGroup>
 </Project>
