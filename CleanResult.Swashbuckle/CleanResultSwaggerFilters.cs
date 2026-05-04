@@ -23,29 +23,33 @@ internal class CleanResultReturnTypeFilter : IOperationFilter
         if (returnType == typeof(Result))
         {
             operation.Responses?.Remove("200");
-            operation.Responses?.Add("204", new OpenApiResponse
-            {
-                Description = "Success",
-                Content = null
-            });
+            operation.Responses?.Remove("204");
+            operation.Responses?.Add(
+                "204",
+                new OpenApiResponse { Description = "Success", Content = null }
+            );
         }
 
-        if (returnType.IsGenericType &&
-            returnType.GetGenericTypeDefinition() == typeof(Result<>))
+        if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Result<>))
         {
             operation.Responses?.Remove("200");
-            operation.Responses?.Add("200", new OpenApiResponse
-            {
-                Description = "Success",
-                Content = new Dictionary<string, OpenApiMediaType>
+            operation.Responses?.Add(
+                "200",
+                new OpenApiResponse
                 {
-                    ["application/json"] = new()
+                    Description = "Success",
+                    Content = new Dictionary<string, OpenApiMediaType>
                     {
-                        Schema = context.SchemaGenerator.GenerateSchema(
-                            returnType.GetGenericArguments()[0], context.SchemaRepository)
-                    }
+                        ["application/json"] = new()
+                        {
+                            Schema = context.SchemaGenerator.GenerateSchema(
+                                returnType.GetGenericArguments()[0],
+                                context.SchemaRepository
+                            ),
+                        },
+                    },
                 }
-            });
+            );
         }
     }
 }
@@ -57,8 +61,11 @@ internal class CleanResultSchemaFilter : ISchemaFilter
 {
     public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
     {
-        if (context.Type == typeof(Result) ||
-            context.Type.IsGenericType && context.Type.GetGenericTypeDefinition() == typeof(Result<>))
+        if (
+            context.Type == typeof(Result)
+            || context.Type.IsGenericType
+                && context.Type.GetGenericTypeDefinition() == typeof(Result<>)
+        )
         {
             switch (schema)
             {
@@ -83,8 +90,8 @@ internal class CleanResultReturnDocumentFilter : IDocumentFilter
         if (swaggerDoc.Components?.Schemas is null)
             return;
 
-        var keysToRemove = swaggerDoc.Components.Schemas
-            .Where(kvp => kvp.Value.Title == Constants.ToDeleteSchemaName)
+        var keysToRemove = swaggerDoc
+            .Components.Schemas.Where(kvp => kvp.Value.Title == Constants.ToDeleteSchemaName)
             .Select(kvp => kvp.Key)
             .ToList();
 
