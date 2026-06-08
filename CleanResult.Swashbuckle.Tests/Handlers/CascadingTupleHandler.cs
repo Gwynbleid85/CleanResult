@@ -1,22 +1,25 @@
 namespace CleanResult.Swashbuckle.Tests.Handlers;
 
-public record CascadingTupleCommand(int Id);
+public record CascadingTupleCommand(bool Fail);
 
 public class CascadingTupleHandler
 {
-    public static Task<(Result<string>, string)> LoadAsync(CascadingTupleCommand command)
+    public static async Task<(Result<int>, string?)> LoadAsync(CascadingTupleCommand command)
     {
-        return Task.FromResult((Result.Ok("asd"), "asdf"));
+        if (command.Fail)
+        {
+            return (Result.Error("Testing error", 417), null);
+        }
+        return (Result.Ok(1), "asdf");
     }
 
     public static Task<(Result<string> result, string? message, int? value)> Handle(
         CascadingTupleCommand command,
-        string loadAsyncSuccessValue
+        int loadAsyncSuccessValue
     )
     {
-        var message = $"Value: {loadAsyncSuccessValue}";
         return Task.FromResult<(Result<string> result, string? message, int? value)>(
-            (Result.Error(), "message", 1)
+            (Result.Ok(loadAsyncSuccessValue.ToString()), "loadAsyncSuccessValue", 1)
         );
     }
 }

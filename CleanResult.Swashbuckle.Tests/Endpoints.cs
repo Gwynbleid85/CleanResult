@@ -1,4 +1,6 @@
+using CleanResult.Swashbuckle.Tests.Handlers;
 using Microsoft.AspNetCore.Mvc;
+using Wolverine;
 using Wolverine.Http;
 
 namespace CleanResult.Swashbuckle.Tests;
@@ -103,6 +105,13 @@ public class Endpoints
     public static Result Index7()
     {
         return Result.Ok();
+    }
+
+    [WolverinePost("/handlers/tuple")]
+    public static async Task<Result<string>> handleTuple(IMessageBus bus, [FromQuery] bool fail)
+    {
+        var result = await bus.InvokeAsync<Result<string>>(new CascadingTupleCommand(fail));
+        return result;
     }
 
     public class NullableResponse
