@@ -35,10 +35,15 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
         }
 
         result = call.Creates.FirstOrDefault(x =>
-            x.VariableType.IsGenericType && x.VariableType.GetGenericTypeDefinition() == typeof(Result<>));
+            x.VariableType.IsGenericType
+            && x.VariableType.GetGenericTypeDefinition() == typeof(Result<>)
+        );
         if (result != null)
         {
-            frame = new MaybeEndHandlerWithGenericCleanResultFrame(result, GetHandlerReturnType(call));
+            frame = new MaybeEndHandlerWithGenericCleanResultFrame(
+                result,
+                GetHandlerReturnType(call)
+            );
             return true;
         }
 
@@ -58,10 +63,14 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
         if (!type.IsGenericType)
             return type.FullName ?? type.Name;
 
-        var namePrefix =
-            (type.GetGenericTypeDefinition().FullName ?? type.Name).Split('`',
-                StringSplitOptions.RemoveEmptyEntries)[0];
-        var genericParameters = string.Join(",", type.GetGenericArguments().Select(GetFriendlyTypeName));
+        var namePrefix = (type.GetGenericTypeDefinition().FullName ?? type.Name).Split(
+            '`',
+            StringSplitOptions.RemoveEmptyEntries
+        )[0];
+        var genericParameters = string.Join(
+            ",",
+            type.GetGenericArguments().Select(GetFriendlyTypeName)
+        );
         return namePrefix + "<" + genericParameters + ">";
     }
 
@@ -73,7 +82,8 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
     /// <returns>Return type of Handle/HandleAsync handler method. Without enclosing Task type</returns>
     private static HandlerReturnType? GetHandlerReturnType(MethodCall call)
     {
-        var handleMethod = call.HandlerType.GetMethods()
+        var handleMethod = call
+            .HandlerType.GetMethods()
             .FirstOrDefault(m => m.Name.EndsWith("Handle") || m.Name.EndsWith("HandleAsync"));
 
         if (handleMethod == null)
@@ -91,21 +101,20 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
         return new HandlerReturnType(returnType, nullabilityInfo);
     }
 
-    private sealed record HandlerReturnType(Type Type, NullabilityInfo? NullabilityInfo);
-
     private static bool IsTupleType(Type type)
     {
         if (!type.IsGenericType)
             return false;
 
         var fullName = type.GetGenericTypeDefinition().FullName;
-        return fullName?.StartsWith("System.Tuple") == true || fullName?.StartsWith("System.ValueTuple") == true;
+        return fullName?.StartsWith("System.Tuple") == true
+            || fullName?.StartsWith("System.ValueTuple") == true;
     }
 
     private static bool IsCleanResultType(Type type)
     {
-        return type == typeof(Result) ||
-               type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Result<>);
+        return type == typeof(Result)
+            || type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Result<>);
     }
 
     private static bool IsNullableTupleFollower(Type type, NullabilityInfo? nullabilityInfo)
@@ -116,7 +125,10 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
         return !type.IsValueType && nullabilityInfo?.ReadState == NullabilityState.Nullable;
     }
 
-    private static string BuildErrorContinuationValue(Variable result, HandlerReturnType handlerReturnType)
+    private static string BuildErrorContinuationValue(
+        Variable result,
+        HandlerReturnType handlerReturnType
+    )
     {
         if (!IsTupleType(handlerReturnType.Type))
         {
@@ -128,21 +140,12 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
         var tupleTypes = handlerReturnType.Type.GetGenericArguments();
         if (tupleTypes.Length == 0 || !IsCleanResultType(tupleTypes[0]))
             throw new InvalidOperationException(
-                $"CleanResult Wolverine continuation requires tuple handler return type '{handlerReturnType.Type}' to have a Result as its first value.");
+                $"CleanResult Wolverine continuation requires tuple handler return type '{handlerReturnType.Type}' to have a Result as its first value."
+            );
 
-        var tupleNullability = handlerReturnType.NullabilityInfo?.GenericTypeArguments ?? [];
-        for (var i = 1; i < tupleTypes.Length; i++)
-        {
-            var nullabilityInfo = i < tupleNullability.Length ? tupleNullability[i] : null;
-            if (!IsNullableTupleFollower(tupleTypes[i], nullabilityInfo))
-                throw new InvalidOperationException(
-                    $"CleanResult Wolverine continuation requires tuple handler return type '{handlerReturnType.Type}' values after the first Result to be nullable.");
-        }
-
-        var errorResult = $"{GetFriendlyTypeName(tupleTypes[0])}.Error({result.Usage}.ErrorValue)";
-        var nullValues = string.Join(", ", tupleTypes.Skip(1).Select(_ => "null"));
-        var constructorArguments = string.IsNullOrEmpty(nullValues) ? errorResult : $"{errorResult}, {nullValues}";
-        return $"new {GetFriendlyTypeName(handlerReturnType.Type)}({constructorArguments})";
+        return tupleTypes[0] != result.VariableType
+            ? $"{GetFriendlyTypeName(tupleTypes[0])}.Error({result.Usage}.ErrorValue)"
+            : result.Usage;
     }
 
     /// <summary>
@@ -187,6 +190,8 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
         return [];
     }
 
+    private sealed record HandlerReturnType(Type Type, NullabilityInfo? NullabilityInfo);
+
     /// <summary>
     /// Generate code for the continuation frame that checks the non-generics cleanResult of the handler execution.
     /// </summary>
@@ -195,7 +200,10 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
         private readonly HandlerReturnType? _handlerReturnType;
         private readonly Variable _result;
 
-        public MaybeEndHandlerWithCleanResultFrame(Variable result, HandlerReturnType? handlerReturnType)
+        public MaybeEndHandlerWithCleanResultFrame(
+            Variable result,
+            HandlerReturnType? handlerReturnType
+        )
         {
             uses.Add(result);
             _result = result;
@@ -210,7 +218,8 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
             writer.Write($"BLOCK:if ({_result.Usage}.IsError())");
             if (_handlerReturnType != null)
                 writer.Write(
-                    $"await context.EnqueueCascadingAsync({BuildErrorContinuationValue(_result, _handlerReturnType)}).ConfigureAwait(false);");
+                    $"await context.EnqueueCascadingAsync({BuildErrorContinuationValue(_result, _handlerReturnType)}).ConfigureAwait(false);"
+                );
             writer.Write("return;");
             writer.FinishBlock();
             writer.BlankLine();
@@ -228,21 +237,37 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
         private readonly HandlerReturnType? _handlerReturnType;
         private readonly Variable _result;
 
-        public MaybeEndHandlerWithGenericCleanResultFrame(Variable result, HandlerReturnType? handlerReturnType)
+        public MaybeEndHandlerWithGenericCleanResultFrame(
+            Variable result,
+            HandlerReturnType? handlerReturnType
+        )
         {
             uses.Add(result);
             // Register a new variable for the success value of the Result<T>
-            creates.Add(new Variable(result.VariableType.GetGenericArguments()[0], result.Usage + "SuccessValue"));
+            creates.Add(
+                new Variable(
+                    result.VariableType.GetGenericArguments()[0],
+                    result.Usage + "SuccessValue"
+                )
+            );
 
-            var tupleInnerValues = GetTupleInnerValues(new Variable(result.VariableType.GetGenericArguments()[0],
-                result.Usage + "SuccessValue"));
+            var tupleInnerValues = GetTupleInnerValues(
+                new Variable(
+                    result.VariableType.GetGenericArguments()[0],
+                    result.Usage + "SuccessValue"
+                )
+            );
 
             // If the Result<T> is a tuple, create variables for each inner value
             foreach (var innerValue in tupleInnerValues)
                 creates.Add(innerValue);
 
-
-            creates.Add(new Variable(result.VariableType.GetGenericArguments()[0], result.Usage + "SuccessValue"));
+            creates.Add(
+                new Variable(
+                    result.VariableType.GetGenericArguments()[0],
+                    result.Usage + "SuccessValue"
+                )
+            );
             _result = result;
             _handlerReturnType = handlerReturnType;
         }
@@ -255,13 +280,13 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
             writer.Write($"BLOCK:if ({_result.Usage}.IsError())");
             if (_handlerReturnType != null)
                 writer.Write(
-                    $"await context.EnqueueCascadingAsync({BuildErrorContinuationValue(_result, _handlerReturnType)}).ConfigureAwait(false);");
+                    $"await context.EnqueueCascadingAsync({BuildErrorContinuationValue(_result, _handlerReturnType)}).ConfigureAwait(false);"
+                );
             writer.Write("return;");
             writer.FinishBlock();
 
             writer.WriteComment("Extracting the success value from Result<T>");
-            writer.WriteLine(
-                $"var {_result.Usage}SuccessValue = {_result.Usage}.Value;");
+            writer.WriteLine($"var {_result.Usage}SuccessValue = {_result.Usage}.Value;");
 
             Next?.GenerateCode(method, writer);
         }

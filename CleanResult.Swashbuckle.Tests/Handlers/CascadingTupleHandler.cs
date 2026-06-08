@@ -4,21 +4,19 @@ public record CascadingTupleCommand(int Id);
 
 public class CascadingTupleHandler
 {
-    public static Task<Result<int>> LoadAsync(CascadingTupleCommand command)
+    public static Task<(Result<string>, string)> LoadAsync(CascadingTupleCommand command)
     {
-        return command.Id > 0
-            ? Task.FromResult(Result.Ok(command.Id))
-            : Task.FromResult(Result<int>.Error("Invalid command ID", 400));
+        return Task.FromResult((Result.Ok("asd"), "asdf"));
     }
 
-    public static Task<(Result<int> result, string? message, int? value)> Handle(
+    public static Task<(Result<string> result, string? message, int? value)> Handle(
         CascadingTupleCommand command,
-        int loadAsyncSuccessValue
+        string loadAsyncSuccessValue
     )
     {
         var message = $"Value: {loadAsyncSuccessValue}";
-        return Task.FromResult<(Result<int> result, string? message, int? value)>(
-            (Result.Ok(loadAsyncSuccessValue), message, loadAsyncSuccessValue)
+        return Task.FromResult<(Result<string> result, string? message, int? value)>(
+            (Result.Error(), "message", 1)
         );
     }
 }
