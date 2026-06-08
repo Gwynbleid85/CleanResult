@@ -9,6 +9,8 @@ public record TupleCommand(int Id);
 
 public record AlternativeTupleCommand(int Id);
 
+public record CascadingTupleCommand(int Id);
+
 // Response DTOs
 public record UserDto(int Id, string Name, string Email);
 

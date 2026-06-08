@@ -1,3 +1,4 @@
+using System.Reflection;
 using JasperFx.CodeGeneration;
 using JasperFx.CodeGeneration.Frames;
 using JasperFx.CodeGeneration.Model;
@@ -70,14 +71,78 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
     /// </summary>
     /// <param name="call"></param>
     /// <returns>Return type of Handle/HandleAsync handler method. Without enclosing Task type</returns>
-    private Type? GetHandlerReturnType(MethodCall call)
+    private static HandlerReturnType? GetHandlerReturnType(MethodCall call)
     {
-        var returnType = call.HandlerType.GetMethods()
-            .FirstOrDefault(m => m.Name.EndsWith("Handle") || m.Name.EndsWith("HandleAsync"))?.ReturnType;
+        var handleMethod = call.HandlerType.GetMethods()
+            .FirstOrDefault(m => m.Name.EndsWith("Handle") || m.Name.EndsWith("HandleAsync"));
 
-        if (returnType?.GetGenericTypeDefinition() == typeof(Task<>))
-            returnType = returnType.GetGenericArguments().FirstOrDefault();
-        return returnType;
+        if (handleMethod == null)
+            return null;
+
+        var returnType = handleMethod.ReturnType;
+        var nullabilityInfo = new NullabilityInfoContext().Create(handleMethod.ReturnParameter);
+
+        if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>))
+        {
+            returnType = returnType.GetGenericArguments()[0];
+            nullabilityInfo = nullabilityInfo.GenericTypeArguments.FirstOrDefault();
+        }
+
+        return new HandlerReturnType(returnType, nullabilityInfo);
+    }
+
+    private sealed record HandlerReturnType(Type Type, NullabilityInfo? NullabilityInfo);
+
+    private static bool IsTupleType(Type type)
+    {
+        if (!type.IsGenericType)
+            return false;
+
+        var fullName = type.GetGenericTypeDefinition().FullName;
+        return fullName?.StartsWith("System.Tuple") == true || fullName?.StartsWith("System.ValueTuple") == true;
+    }
+
+    private static bool IsCleanResultType(Type type)
+    {
+        return type == typeof(Result) ||
+               type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Result<>);
+    }
+
+    private static bool IsNullableTupleFollower(Type type, NullabilityInfo? nullabilityInfo)
+    {
+        if (Nullable.GetUnderlyingType(type) != null)
+            return true;
+
+        return !type.IsValueType && nullabilityInfo?.ReadState == NullabilityState.Nullable;
+    }
+
+    private static string BuildErrorContinuationValue(Variable result, HandlerReturnType handlerReturnType)
+    {
+        if (!IsTupleType(handlerReturnType.Type))
+        {
+            return handlerReturnType.Type != result.VariableType
+                ? $"{GetFriendlyTypeName(handlerReturnType.Type)}.Error({result.Usage}.ErrorValue)"
+                : result.Usage;
+        }
+
+        var tupleTypes = handlerReturnType.Type.GetGenericArguments();
+        if (tupleTypes.Length == 0 || !IsCleanResultType(tupleTypes[0]))
+            throw new InvalidOperationException(
+                $"CleanResult Wolverine continuation requires tuple handler return type '{handlerReturnType.Type}' to have a Result as its first value.");
+
+        var tupleNullability = handlerReturnType.NullabilityInfo?.GenericTypeArguments ?? [];
+        for (var i = 1; i < tupleTypes.Length; i++)
+        {
+            var nullabilityInfo = i < tupleNullability.Length ? tupleNullability[i] : null;
+            if (!IsNullableTupleFollower(tupleTypes[i], nullabilityInfo))
+                throw new InvalidOperationException(
+                    $"CleanResult Wolverine continuation requires tuple handler return type '{handlerReturnType.Type}' values after the first Result to be nullable.");
+        }
+
+        var errorResult = $"{GetFriendlyTypeName(tupleTypes[0])}.Error({result.Usage}.ErrorValue)";
+        var nullValues = string.Join(", ", tupleTypes.Skip(1).Select(_ => "null"));
+        var constructorArguments = string.IsNullOrEmpty(nullValues) ? errorResult : $"{errorResult}, {nullValues}";
+        return $"new {GetFriendlyTypeName(handlerReturnType.Type)}({constructorArguments})";
     }
 
     /// <summary>
@@ -127,10 +192,10 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
     /// </summary>
     private class MaybeEndHandlerWithCleanResultFrame : AsyncFrame
     {
-        private readonly Type? _handlerReturnType;
+        private readonly HandlerReturnType? _handlerReturnType;
         private readonly Variable _result;
 
-        public MaybeEndHandlerWithCleanResultFrame(Variable result, Type? handlerReturnType)
+        public MaybeEndHandlerWithCleanResultFrame(Variable result, HandlerReturnType? handlerReturnType)
         {
             uses.Add(result);
             _result = result;
@@ -145,10 +210,7 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
             writer.Write($"BLOCK:if ({_result.Usage}.IsError())");
             if (_handlerReturnType != null)
                 writer.Write(
-                    // Retype the Result type only if necessary
-                    _handlerReturnType != _result.VariableType
-                        ? $"await context.EnqueueCascadingAsync({GetFriendlyTypeName(_handlerReturnType)}.Error({_result.Usage}.ErrorValue)).ConfigureAwait(false);"
-                        : $"await context.EnqueueCascadingAsync({_result.Usage}).ConfigureAwait(false);");
+                    $"await context.EnqueueCascadingAsync({BuildErrorContinuationValue(_result, _handlerReturnType)}).ConfigureAwait(false);");
             writer.Write("return;");
             writer.FinishBlock();
             writer.BlankLine();
@@ -163,10 +225,10 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
     /// </summary>
     private class MaybeEndHandlerWithGenericCleanResultFrame : AsyncFrame
     {
-        private readonly Type? _handlerReturnType;
+        private readonly HandlerReturnType? _handlerReturnType;
         private readonly Variable _result;
 
-        public MaybeEndHandlerWithGenericCleanResultFrame(Variable result, Type? handlerReturnType)
+        public MaybeEndHandlerWithGenericCleanResultFrame(Variable result, HandlerReturnType? handlerReturnType)
         {
             uses.Add(result);
             // Register a new variable for the success value of the Result<T>
@@ -192,11 +254,8 @@ public class CleanResultContinuationStrategy : IContinuationStrategy
 
             writer.Write($"BLOCK:if ({_result.Usage}.IsError())");
             if (_handlerReturnType != null)
-                // Retype the Result type only if necessary
                 writer.Write(
-                    _handlerReturnType != _result.VariableType
-                        ? $"await context.EnqueueCascadingAsync({GetFriendlyTypeName(_handlerReturnType)}.Error({_result.Usage}.ErrorValue)).ConfigureAwait(false);"
-                        : $"await context.EnqueueCascadingAsync({_result.Usage}).ConfigureAwait(false);");
+                    $"await context.EnqueueCascadingAsync({BuildErrorContinuationValue(_result, _handlerReturnType)}).ConfigureAwait(false);");
             writer.Write("return;");
             writer.FinishBlock();
 

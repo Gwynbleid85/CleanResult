@@ -1,4 +1,5 @@
 using CleanResult.Swashbuckle.Tests;
+using JasperFx;
 using Wolverine.Http;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +12,6 @@ builder.Services.AddWolverineHttp();
 
 builder.Host.AddProjects(["CleanResult.Swashbuckle.Tests"]);
 builder.Services.AddSwagger("CleanResult Swagger Test", ["CleanResult.Swashbuckle.Tests"]);
-
 
 var app = builder.Build();
 
@@ -27,7 +27,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapWolverineEndpoints();
 
-app.Run();
+return await app.RunJasperFxCommands(args);
 
 /// <summary>
 /// Exposes the test application's entry point to integration tests.

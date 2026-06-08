@@ -69,11 +69,25 @@ public class Endpoints
         return Result.Ok<CustomResponse?>(null);
     }
 
-    [WolverineGet("/stream")]
+    [WolverineGet("/result/stream")]
     public static Result<Stream> Stream()
     {
         Stream stream = File.OpenRead("Endpoints.cs");
         return Result.Ok(stream);
+    }
+
+    [WolverineGet("/raw/stream")]
+    public static Stream Stream2()
+    {
+        Stream stream = File.OpenRead("Endpoints.cs");
+        return stream;
+    }
+
+    [WolverineGet("/iresult")]
+    public static IResult IResultResponse()
+    {
+        Stream stream = File.OpenRead("Endpoints.cs");
+        return Results.Stream(stream);
     }
 
     [WolverineGet("/nullable-test2")]
