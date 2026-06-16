@@ -265,6 +265,7 @@ internal class AspActionResult<T> : IActionResult
 | `Result<string>.Ok("text")` | 200 OK         | text/plain               | Raw string                 |
 | `Result<User>.Ok(user)`     | 200 OK         | application/json         | JSON object                |
 | `Result<byte[]>.Ok(data)`   | 200 OK         | application/octet-stream | Binary data                |
+| `Result<Stream>.Ok(stream, contentType, fileDownloadName)` | 200 OK | configured content type | Streamed file              |
 | `Result.Error("msg", 404)`  | 404 Not Found  | application/json         | Problem Details (RFC 9457) |
 
 ---

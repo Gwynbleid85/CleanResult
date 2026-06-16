@@ -139,6 +139,11 @@ public Result<string> GetMessage()
 public Result<byte[]> GetFile()
     => Result.Ok(fileBytes);  // Content-Type: application/octet-stream
 
+// 📥 Streamed file download with range processing
+[HttpGet("document")]
+public Result<Stream> GetDocument()
+    => Result<Stream>.Ok(stream, contentType: mimeType, fileDownloadName: fileName, enableRangeProcessing: true);
+
 // 🔤 XML document
 [HttpGet("xml")]
 public Result<XDocument> GetXml()
@@ -273,6 +278,7 @@ Result.Ok(HttpStatusCode statusCode)                 // Success without value an
 Result.Ok<T>(T value)                                // Success with value
 Result.Ok<T>(T value, int statusCode)                // Success with value and custom status
 Result.Ok<T>(T value, HttpStatusCode statusCode)     // Success with value and custom status
+Result<Stream>.Ok(stream, contentType, fileDownloadName, lastModified, entityTag, enableRangeProcessing)
 Result.Error(string title)                           // Error with title
 Result.Error(string title, int status)               // Error with status code
 Result.Error(string title, HttpStatusCode status)    // Error with HTTP status
@@ -334,6 +340,7 @@ public struct Error
 | `Result<User>.Ok(user)`                           | 200 OK         | application/json         | JSON object     |
 | `Result.Ok(user, HttpStatusCode.Created)`         | 201 Created    | application/json         | JSON object     |
 | `Result<byte[]>.Ok(data)`                         | 200 OK         | application/octet-stream | Binary data     |
+| `Result<Stream>.Ok(stream, contentType, fileDownloadName)` | 200 OK | configured content type  | Streamed file   |
 | `Result.Error("msg", 404)`                        | 404 Not Found  | application/json         | Problem Details |
 
 **Error Response (RFC 9457):**

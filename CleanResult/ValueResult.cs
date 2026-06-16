@@ -1,7 +1,9 @@
+using System.IO.Pipelines;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Net.Http.Headers;
 
 namespace CleanResult;
 
@@ -26,6 +28,9 @@ public class Result<T> : IResult
     [JsonPropertyName("ErrorValue")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     internal Error? InternalErrorValue { get; init; }
+
+    [JsonIgnore]
+    internal IResult? SuccessResult { get; init; }
 
     /// <summary>
     /// Value of the result if it represents success.
@@ -55,6 +60,12 @@ public class Result<T> : IResult
     {
         if (IsOk())
         {
+            if (SuccessResult is not null)
+            {
+                await SuccessResult.ExecuteAsync(httpContext);
+                return;
+            }
+
             httpContext.Response.StatusCode = SuccessStatus ?? StatusCodes.Status200OK;
             httpContext.Response.ContentType = ContentTypeResolver.GetContentType<T>();
 
@@ -166,6 +177,99 @@ public class Result<T> : IResult
     public static Result<T> Ok(T value, HttpStatusCode statusCode)
     {
         return Ok(value, (int)statusCode);
+    }
+
+    /// <summary>
+    /// Creates a successful stream response.
+    /// </summary>
+    /// <param name="stream">The stream to write to the response.</param>
+    /// <param name="contentType">The Content-Type header.</param>
+    /// <param name="fileDownloadName">The file name to use in the Content-Disposition header.</param>
+    /// <param name="lastModified">The Last-Modified header value.</param>
+    /// <param name="entityTag">The ETag header value.</param>
+    /// <param name="enableRangeProcessing">Whether range requests are enabled.</param>
+    /// <returns>Result object representing a successful stream response.</returns>
+    public static Result<Stream> Ok(
+        Stream stream,
+        string? contentType,
+        string? fileDownloadName = null,
+        DateTimeOffset? lastModified = null,
+        EntityTagHeaderValue? entityTag = null,
+        bool enableRangeProcessing = false)
+    {
+        return new Result<Stream>
+        {
+            Success = true,
+            SuccessValue = stream,
+            SuccessResult = Results.Stream(
+                stream,
+                contentType,
+                fileDownloadName,
+                lastModified,
+                entityTag,
+                enableRangeProcessing)
+        };
+    }
+
+    /// <summary>
+    /// Creates a successful stream response from a pipe reader.
+    /// </summary>
+    /// <param name="pipeReader">The pipe reader to write to the response.</param>
+    /// <param name="contentType">The Content-Type header.</param>
+    /// <param name="fileDownloadName">The file name to use in the Content-Disposition header.</param>
+    /// <param name="lastModified">The Last-Modified header value.</param>
+    /// <param name="entityTag">The ETag header value.</param>
+    /// <param name="enableRangeProcessing">Whether range requests are enabled.</param>
+    /// <returns>Result object representing a successful stream response.</returns>
+    public static Result<PipeReader> Ok(
+        PipeReader pipeReader,
+        string? contentType,
+        string? fileDownloadName = null,
+        DateTimeOffset? lastModified = null,
+        EntityTagHeaderValue? entityTag = null,
+        bool enableRangeProcessing = false)
+    {
+        return new Result<PipeReader>
+        {
+            Success = true,
+            SuccessValue = pipeReader,
+            SuccessResult = Results.Stream(
+                pipeReader,
+                contentType,
+                fileDownloadName,
+                lastModified,
+                entityTag,
+                enableRangeProcessing)
+        };
+    }
+
+    /// <summary>
+    /// Creates a successful stream response from a callback that writes to the response stream.
+    /// </summary>
+    /// <param name="streamWriterCallback">The callback that writes to the response stream.</param>
+    /// <param name="contentType">The Content-Type header.</param>
+    /// <param name="fileDownloadName">The file name to use in the Content-Disposition header.</param>
+    /// <param name="lastModified">The Last-Modified header value.</param>
+    /// <param name="entityTag">The ETag header value.</param>
+    /// <returns>Result object representing a successful stream response.</returns>
+    public static Result<Func<Stream, Task>> Ok(
+        Func<Stream, Task> streamWriterCallback,
+        string? contentType,
+        string? fileDownloadName = null,
+        DateTimeOffset? lastModified = null,
+        EntityTagHeaderValue? entityTag = null)
+    {
+        return new Result<Func<Stream, Task>>
+        {
+            Success = true,
+            SuccessValue = streamWriterCallback,
+            SuccessResult = Results.Stream(
+                streamWriterCallback,
+                contentType,
+                fileDownloadName,
+                lastModified,
+                entityTag)
+        };
     }
 
     /// <summary>

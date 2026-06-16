@@ -2,6 +2,7 @@ using System.Xml;
 using System.Xml.Linq;
 using CleanResult;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Tests.Utils;
 
 namespace Tests;
@@ -95,6 +96,50 @@ public class ContentTypeTests
 
         var body = HttpContextUtils.ReadContextBodyAsBytes(httpContext);
         Assert.Equal(data, body);
+    }
+
+    [Fact]
+    public async Task StreamOkResult_ReturnsConfiguredFileResponse()
+    {
+        var data = "File content"u8.ToArray();
+        var stream = new MemoryStream(data);
+        var result = Result<Stream>.Ok(
+            stream,
+            contentType: "application/pdf",
+            fileDownloadName: "document.pdf",
+            enableRangeProcessing: true);
+        var httpContext = HttpContextUtils.GetHttpContext();
+        httpContext.RequestServices = new ServiceCollection().AddLogging().BuildServiceProvider();
+
+        await result.ExecuteAsync(httpContext);
+
+        Assert.Equal(StatusCodes.Status200OK, httpContext.Response.StatusCode);
+        Assert.Equal("application/pdf", httpContext.Response.ContentType);
+        Assert.Equal("attachment; filename=document.pdf; filename*=UTF-8''document.pdf", httpContext.Response.Headers.ContentDisposition);
+        Assert.Equal("bytes", httpContext.Response.Headers.AcceptRanges);
+
+        var body = HttpContextUtils.ReadContextBodyAsBytes(httpContext);
+        Assert.Equal(data, body);
+    }
+
+    [Fact]
+    public async Task StreamOkResult_SupportsRangeProcessing()
+    {
+        var data = "File content"u8.ToArray();
+        var stream = new MemoryStream(data);
+        var result = Result<Stream>.Ok(stream, contentType: "application/octet-stream", enableRangeProcessing: true);
+        var httpContext = HttpContextUtils.GetHttpContext();
+        httpContext.RequestServices = new ServiceCollection().AddLogging().BuildServiceProvider();
+        httpContext.Request.Method = HttpMethods.Get;
+        httpContext.Request.Headers.Range = "bytes=0-3";
+
+        await result.ExecuteAsync(httpContext);
+
+        Assert.Equal(StatusCodes.Status206PartialContent, httpContext.Response.StatusCode);
+        Assert.Equal("bytes 0-3/12", httpContext.Response.Headers.ContentRange);
+
+        var body = HttpContextUtils.ReadContextBodyAsBytes(httpContext);
+        Assert.Equal("File"u8.ToArray(), body);
     }
 
     [Fact]
