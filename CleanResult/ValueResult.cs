@@ -3,6 +3,8 @@ using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 
 namespace CleanResult;
@@ -87,11 +89,8 @@ public class Result<T> : IResult
                 default:
                     if (ContentTypeResolver.ShouldSerializeAsJson<T>())
                     {
-                        await httpContext.Response.WriteAsync(JsonSerializer.Serialize(Value,
-                            new JsonSerializerOptions
-                            {
-                                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                            }));
+                        await httpContext.Response.WriteAsync(
+                            JsonSerializer.Serialize(Value, ResolveSerializerOptions(httpContext)));
                     }
                     else
                     {
@@ -109,6 +108,23 @@ public class Result<T> : IResult
         httpContext.Response.ContentType = "application/json";
         await httpContext.Response.WriteAsync(JsonSerializer.Serialize(InternalErrorValue));
     }
+
+    /// <summary>Fallback options used only when no ASP.NET Core Http.Json options are available (e.g. non-HTTP host).</summary>
+    private static readonly JsonSerializerOptions FallbackSerializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
+    /// <summary>
+    /// Resolve the application's configured System.Text.Json options so global customizations
+    /// (e.g. a JsonStringEnumConverter added via ConfigureHttpJsonOptions) apply to the response body.
+    /// Falls back to camelCase when the request has no service provider.
+    /// </summary>
+    private static JsonSerializerOptions ResolveSerializerOptions(HttpContext httpContext) =>
+        httpContext.RequestServices?
+            .GetService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>()?
+            .Value.SerializerOptions
+        ?? FallbackSerializerOptions;
 
 
     /// <summary>
