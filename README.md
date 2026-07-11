@@ -32,6 +32,7 @@ Brings functional error handling to C# with built-in ASP.NET Core integration an
 - 🌐 **ASP.NET Core Integration** - Direct `IResult` implementation for seamless web API integration
 - 📜 **RFC 9457 Compliant** - Full Problem Details specification support
 - ✅ **Custom Success Status Codes** - Return `201 Created`, `202 Accepted`, and other success codes without leaving the `Result` API
+- ⚙️ **Global Configuration** - Customize default status codes and ASP.NET Core serialization
 - 🎯 **Smart Content-Type Detection** - Automatically sets correct Content-Type based on return type
 - 🪶 **Zero Dependencies** - Lightweight library with minimal overhead
 - ⚡ **High Performance** - No reflection, optimized for speed
@@ -69,6 +70,7 @@ CleanResult offers specialized extensions for popular frameworks:
 
 - Custom success status codes for `Result` and `Result<T>`
 - New overloads for returning success values with `int` or `HttpStatusCode`
+- Global configuration for default status codes, unknown error titles, and ASP.NET Core serialization
 - Safer overload design so `Result.Ok(42)` still returns `Result<int>`, not a status-only result
 
 ### Installation
@@ -327,6 +329,67 @@ public struct Error
     public string? Instance { get; set; }               // URI identifying occurrence
     public IDictionary<string, string[]>? Errors { get; set; }  // Validation errors
 }
+```
+
+### ⚙️ Configuration
+
+Use `CleanResultConfiguration` to customize global defaults.
+
+#### ASP.NET Core response configuration
+
+These settings affect `Result.ExecuteAsync(HttpContext)` and `Result<T>.ExecuteAsync(HttpContext)`.
+
+```csharp
+using CleanResult;
+using Microsoft.AspNetCore.Http;
+
+// Default status code for Result.Ok() responses without a body.
+// Default: 204 No Content
+CleanResultConfiguration.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status204NoContent;
+
+// Default status code for Result<T>.Ok(value) responses.
+// Default: 200 OK
+CleanResultConfiguration.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status200OK;
+
+// Customize success response serialization for JSON values.
+CleanResultConfiguration.AspNetCore.SuccessSerializationFunction = value =>
+    JsonSerializer.Serialize(value, new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+    });
+
+// Customize error response serialization.
+CleanResultConfiguration.AspNetCore.ErrorSerializationFunction = error =>
+    JsonSerializer.Serialize(error);
+```
+
+#### Error defaults
+
+These settings affect fallback error values when an error result does not include a concrete `Error` instance.
+
+```csharp
+using CleanResult;
+using Microsoft.AspNetCore.Http;
+
+// Default status code for unspecified errors.
+// Default: 500 Internal Server Error
+CleanResultConfiguration.Errors.DefaultStatusCode = StatusCodes.Status500InternalServerError;
+
+// Default title for unspecified errors.
+// Default: "Unknown error"
+CleanResultConfiguration.Errors.DefaultUnknownTitle = "Unknown error";
+```
+
+For example:
+
+```csharp
+CleanResultConfiguration.Errors.DefaultStatusCode = StatusCodes.Status400BadRequest;
+CleanResultConfiguration.Errors.DefaultUnknownTitle = "Invalid request";
+
+var result = Result.Error();
+
+result.ErrorValue.Status; // 400
+result.ErrorValue.Title;  // "Invalid request"
 ```
 
 ### HTTP Response Behavior
