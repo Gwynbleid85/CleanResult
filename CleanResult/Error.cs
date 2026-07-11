@@ -74,9 +74,11 @@ public struct Error
     /// <returns>Result object representing an error</returns>
     public Error(string title)
     {
-        Type = ProblemDetailsTypeMappings.GetProblemType(500);
+        Type = ProblemDetailsTypeMappings.GetProblemType(
+            CleanResultConfiguration.Errors.DefaultStatusCode
+        );
         Title = title;
-        Status = (int)HttpStatusCode.InternalServerError;
+        Status = CleanResultConfiguration.Errors.DefaultStatusCode;
     }
 
     /// <summary>

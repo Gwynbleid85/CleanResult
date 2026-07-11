@@ -59,9 +59,11 @@ public class Result<T> : IResult
                 ? InternalErrorValue
                     ?? new Error
                     {
-                        Type = ProblemDetailsTypeMappings.GetProblemType(500),
-                        Title = "Unknown error",
-                        Status = StatusCodes.Status500InternalServerError,
+                        Type = ProblemDetailsTypeMappings.GetProblemType(
+                            CleanResultConfiguration.Errors.DefaultStatusCode
+                        ),
+                        Title = CleanResultConfiguration.Errors.DefaultUnknownTitle,
+                        Status = CleanResultConfiguration.Errors.DefaultStatusCode,
                     }
                 : throw new InvalidOperationException("Result is not an error");
         }
@@ -80,7 +82,8 @@ public class Result<T> : IResult
                 return;
             }
 
-            httpContext.Response.StatusCode = SuccessStatus ?? StatusCodes.Status200OK;
+            httpContext.Response.StatusCode =
+                SuccessStatus ?? CleanResultConfiguration.AspNetCore.DefaultValueSuccessStatusCode;
             httpContext.Response.ContentType = ContentTypeResolver.GetContentType<T>();
 
             // Handle different types appropriately
@@ -308,10 +311,10 @@ public class Result<T> : IResult
             InternalErrorValue = new Error
             {
                 Type = ProblemDetailsTypeMappings.GetProblemType(
-                    (int)HttpStatusCode.InternalServerError
+                    CleanResultConfiguration.Errors.DefaultStatusCode
                 ),
                 Title = title,
-                Status = (int)HttpStatusCode.InternalServerError,
+                Status = CleanResultConfiguration.Errors.DefaultStatusCode,
             },
         };
     }
