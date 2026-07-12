@@ -1,6 +1,8 @@
 using System.Text.Json;
 using CleanResult;
+using CleanResult.AspNet;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Tests.Utils;
 
 namespace Tests;
@@ -192,6 +194,53 @@ public class CleanResultConfigurationTests : IDisposable
         await Result.Error("Error message", StatusCodes.Status400BadRequest).ExecuteAsync(httpContext);
 
         Assert.Equal("custom-error:400:Error message", HttpContextUtils.ReadContextBody(httpContext));
+    }
+
+    [Fact]
+    public async Task AddCleanResultConfiguresGlobalOptions()
+    {
+        var services = new ServiceCollection();
+
+        services.AddCleanResult(options =>
+        {
+            options.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status201Created;
+            options.Errors.DefaultUnknownTitle = "Unexpected error";
+        });
+
+        Assert.Equal(StatusCodes.Status201Created, CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode);
+        Assert.Equal("Unexpected error", CleanResultConfiguration.Options.Errors.DefaultUnknownTitle);
+
+        var successContext = HttpContextUtils.GetHttpContext();
+        await Result.Ok(new { Message = "Created" }).ExecuteAsync(successContext);
+
+        Assert.Equal(StatusCodes.Status201Created, successContext.Response.StatusCode);
+        Assert.Equal("Unexpected error", Result.Error().ErrorValue.Title);
+    }
+
+    [Fact]
+    public void AddCleanResultReturnsSameServiceCollection()
+    {
+        var services = new ServiceCollection();
+
+        var returnedServices = services.AddCleanResult(_ => { });
+
+        Assert.Same(services, returnedServices);
+    }
+
+    [Fact]
+    public void AddCleanResultThrowsWhenServicesIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            CleanResultServiceCollectionExtensions.AddCleanResult(null!, _ => { })
+        );
+    }
+
+    [Fact]
+    public void AddCleanResultThrowsWhenConfigureIsNull()
+    {
+        var services = new ServiceCollection();
+
+        Assert.Throws<ArgumentNullException>(() => services.AddCleanResult(null!));
     }
 
     private static void ResetConfiguration()
