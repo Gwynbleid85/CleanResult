@@ -369,6 +369,30 @@ CleanResultConfiguration.Options.AspNetCore.ErrorSerializer = error =>
     JsonSerializer.Serialize(error, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
 ```
 
+`JsonSerializerOptions` is the primary customization point. The default `SuccessSerializer` and `ErrorSerializer`
+read `CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions` each time they serialize a value, so changing
+`JsonSerializerOptions` also changes the default success and error JSON output.
+
+Use `SuccessSerializer` or `ErrorSerializer` only when serializer options are not enough, such as wrapping responses,
+using a different serializer, or producing a non-standard JSON shape. If you replace either serializer, that delegate is
+responsible for using `JsonSerializerOptions` if you still want those options to apply.
+
+```csharp
+// Recommended: customize System.Text.Json behavior for both default serializers.
+CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+{
+    WriteIndented = true
+};
+
+// Advanced: replace only success serialization. This delegate explicitly opts into the configured options.
+CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = value =>
+    JsonSerializer.Serialize(new { data = value }, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
+
+// Advanced: replace error serialization. If the delegate ignores JsonSerializerOptions, those options no longer affect errors.
+CleanResultConfiguration.Options.AspNetCore.ErrorSerializer = error =>
+    JsonSerializer.Serialize(new { error });
+```
+
 #### Error defaults
 
 These settings affect fallback error values when an error result does not include a concrete `Error` instance.
