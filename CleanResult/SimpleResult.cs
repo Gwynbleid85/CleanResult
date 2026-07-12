@@ -50,7 +50,8 @@ public class Result : IResult
         {
             httpContext.Response.ContentType = "application/json";
             httpContext.Response.StatusCode =
-                SuccessStatus ?? CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode;
+                SuccessStatus
+                ?? CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode;
             return;
         }
 
@@ -58,7 +59,7 @@ public class Result : IResult
         httpContext.Response.StatusCode = ErrorValue.Status;
         httpContext.Response.ContentType = "application/json";
         await httpContext.Response.WriteAsync(
-            CleanResultConfiguration.Options.AspNetCore.ErrorSerializationFunction(ErrorValue)
+            CleanResultConfiguration.Options.AspNetCore.ErrorSerializer(ErrorValue)
         );
     }
 

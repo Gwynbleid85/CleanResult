@@ -62,6 +62,40 @@ public class CleanResultConfigurationTests : IDisposable
     }
 
     [Fact]
+    public async Task JsonSerializerOptionsHasDefaultValue()
+    {
+        Assert.Equal(JsonNamingPolicy.CamelCase, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions.PropertyNamingPolicy);
+
+        var httpContext = HttpContextUtils.GetHttpContext();
+        await Result.Ok(new { FirstName = "Ada" }).ExecuteAsync(httpContext);
+
+        Assert.Equal("""{"firstName":"Ada"}""", HttpContextUtils.ReadContextBody(httpContext));
+    }
+
+    [Fact]
+    public async Task JsonSerializerOptionsCanBeOverridden()
+    {
+        CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions = new JsonSerializerOptions();
+
+        var httpContext = HttpContextUtils.GetHttpContext();
+        await Result.Ok(new { FirstName = "Ada" }).ExecuteAsync(httpContext);
+
+        Assert.Equal("""{"FirstName":"Ada"}""", HttpContextUtils.ReadContextBody(httpContext));
+    }
+
+    [Fact]
+    public void DefaultSuccessSerializerUsesUpdatedJsonSerializerOptions()
+    {
+        CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions = new JsonSerializerOptions();
+
+        var serialized = CleanResultConfiguration.Options.AspNetCore.SuccessSerializer(
+            new { FirstName = "Ada" }
+        );
+
+        Assert.Equal("""{"FirstName":"Ada"}""", serialized);
+    }
+
+    [Fact]
     public void DefaultErrorStatusCodeHasDefaultValue()
     {
         Assert.Equal(StatusCodes.Status500InternalServerError, CleanResultConfiguration.Options.Errors.DefaultStatusCode);
@@ -106,19 +140,23 @@ public class CleanResultConfigurationTests : IDisposable
     }
 
     [Fact]
-    public async Task SuccessSerializationFunctionHasDefaultValue()
+    public async Task SuccessSerializerHasDefaultValue()
     {
-        var httpContext = HttpContextUtils.GetHttpContext();
+        Assert.Equal(
+            """{"firstName":"Ada"}""",
+            CleanResultConfiguration.Options.AspNetCore.SuccessSerializer(new { FirstName = "Ada" })
+        );
 
+        var httpContext = HttpContextUtils.GetHttpContext();
         await Result.Ok(new { FirstName = "Ada" }).ExecuteAsync(httpContext);
 
         Assert.Equal("""{"firstName":"Ada"}""", HttpContextUtils.ReadContextBody(httpContext));
     }
 
     [Fact]
-    public async Task SuccessSerializationFunctionCanBeOverridden()
+    public async Task SuccessSerializerCanBeOverridden()
     {
-        CleanResultConfiguration.Options.AspNetCore.SuccessSerializationFunction = _ => "custom-success";
+        CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = _ => "custom-success";
 
         var httpContext = HttpContextUtils.GetHttpContext();
         await Result.Ok(new { FirstName = "Ada" }).ExecuteAsync(httpContext);
@@ -127,21 +165,24 @@ public class CleanResultConfigurationTests : IDisposable
     }
 
     [Fact]
-    public async Task ErrorSerializationFunctionHasDefaultValue()
+    public async Task ErrorSerializerHasDefaultValue()
     {
-        var httpContext = HttpContextUtils.GetHttpContext();
+        var error = Result.Error("Error message", StatusCodes.Status400BadRequest).ErrorValue;
+        var expectedJson =
+            """{"type":"https://tools.ietf.org/html/rfc7231#section-6.5.1","title":"Error message","status":400}""";
 
+        Assert.Equal(expectedJson, CleanResultConfiguration.Options.AspNetCore.ErrorSerializer(error));
+
+        var httpContext = HttpContextUtils.GetHttpContext();
         await Result.Error("Error message", StatusCodes.Status400BadRequest).ExecuteAsync(httpContext);
 
-        Assert.Equal(
-            """{"type":"https://tools.ietf.org/html/rfc7231#section-6.5.1","title":"Error message","status":400}""",
-            HttpContextUtils.ReadContextBody(httpContext));
+        Assert.Equal(expectedJson, HttpContextUtils.ReadContextBody(httpContext));
     }
 
     [Fact]
-    public async Task ErrorSerializationFunctionCanBeOverridden()
+    public async Task ErrorSerializerCanBeOverridden()
     {
-        CleanResultConfiguration.Options.AspNetCore.ErrorSerializationFunction = value =>
+        CleanResultConfiguration.Options.AspNetCore.ErrorSerializer = value =>
         {
             var error = (Error)value;
             return $"custom-error:{error.Status}:{error.Title}";
@@ -157,12 +198,11 @@ public class CleanResultConfigurationTests : IDisposable
     {
         CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status204NoContent;
         CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status200OK;
-        CleanResultConfiguration.Options.AspNetCore.SuccessSerializationFunction = value =>
-            JsonSerializer.Serialize(
-                value,
-                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
-            );
-        CleanResultConfiguration.Options.AspNetCore.ErrorSerializationFunction = value => JsonSerializer.Serialize(value);
+        CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = value =>
+            JsonSerializer.Serialize(value, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
+        CleanResultConfiguration.Options.AspNetCore.ErrorSerializer = value =>
+            JsonSerializer.Serialize(value, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
 
         CleanResultConfiguration.Options.Errors.DefaultStatusCode = StatusCodes.Status500InternalServerError;
         CleanResultConfiguration.Options.Errors.DefaultUnknownTitle = "Unknown error";

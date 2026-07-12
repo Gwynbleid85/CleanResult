@@ -351,16 +351,22 @@ CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode = Sta
 // Default: 200 OK
 CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status200OK;
 
-// Customize success response serialization for JSON values.
-CleanResultConfiguration.Options.AspNetCore.SuccessSerializationFunction = value =>
-    JsonSerializer.Serialize(value, new JsonSerializerOptions
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-    });
+// Customize JSON serialization for success and error responses.
+// Default: new JsonSerializerOptions(JsonSerializerDefaults.Web)
+CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+{
+    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+};
 
-// Customize error response serialization.
-CleanResultConfiguration.Options.AspNetCore.ErrorSerializationFunction = error =>
-    JsonSerializer.Serialize(error);
+// Advanced: fully customize success response serialization.
+// Default: value => JsonSerializer.Serialize(value, JsonSerializerOptions)
+CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = value =>
+    JsonSerializer.Serialize(value, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
+
+// Advanced: fully customize error response serialization.
+// Default: error => JsonSerializer.Serialize(error, JsonSerializerOptions)
+CleanResultConfiguration.Options.AspNetCore.ErrorSerializer = error =>
+    JsonSerializer.Serialize(error, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
 ```
 
 #### Error defaults

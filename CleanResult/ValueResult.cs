@@ -83,7 +83,8 @@ public class Result<T> : IResult
             }
 
             httpContext.Response.StatusCode =
-                SuccessStatus ?? CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode;
+                SuccessStatus
+                ?? CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode;
             httpContext.Response.ContentType = ContentTypeResolver.GetContentType<T>();
 
             // Handle different types appropriately
@@ -105,7 +106,7 @@ public class Result<T> : IResult
                     if (ContentTypeResolver.ShouldSerializeAsJson<T>())
                     {
                         await httpContext.Response.WriteAsync(
-                            CleanResultConfiguration.Options.AspNetCore.SuccessSerializationFunction(Value)
+                            CleanResultConfiguration.Options.AspNetCore.SuccessSerializer(Value)
                         );
                     }
                     else
@@ -123,7 +124,7 @@ public class Result<T> : IResult
         httpContext.Response.StatusCode = ErrorValue.Status;
         httpContext.Response.ContentType = "application/json";
         await httpContext.Response.WriteAsync(
-            CleanResultConfiguration.Options.AspNetCore.ErrorSerializationFunction(ErrorValue)
+            CleanResultConfiguration.Options.AspNetCore.ErrorSerializer(ErrorValue)
         );
     }
 
