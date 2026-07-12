@@ -75,10 +75,10 @@ public struct Error
     public Error(string title)
     {
         Type = ProblemDetailsTypeMappings.GetProblemType(
-            CleanResultConfiguration.Errors.DefaultStatusCode
+            CleanResultConfiguration.Options.Errors.DefaultStatusCode
         );
         Title = title;
-        Status = CleanResultConfiguration.Errors.DefaultStatusCode;
+        Status = CleanResultConfiguration.Options.Errors.DefaultStatusCode;
     }
 
     /// <summary>

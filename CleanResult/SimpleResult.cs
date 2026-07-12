@@ -32,10 +32,10 @@ public class Result : IResult
                     ?? new Error
                     {
                         Type = ProblemDetailsTypeMappings.GetProblemType(
-                            CleanResultConfiguration.Errors.DefaultStatusCode
+                            CleanResultConfiguration.Options.Errors.DefaultStatusCode
                         ),
-                        Title = CleanResultConfiguration.Errors.DefaultUnknownTitle,
-                        Status = CleanResultConfiguration.Errors.DefaultStatusCode,
+                        Title = CleanResultConfiguration.Options.Errors.DefaultUnknownTitle,
+                        Status = CleanResultConfiguration.Options.Errors.DefaultStatusCode,
                     }
                 : throw new InvalidOperationException("Result is not an error");
         }
@@ -50,7 +50,7 @@ public class Result : IResult
         {
             httpContext.Response.ContentType = "application/json";
             httpContext.Response.StatusCode =
-                SuccessStatus ?? CleanResultConfiguration.AspNetCore.DefaultSimpleSuccessStatusCode;
+                SuccessStatus ?? CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode;
             return;
         }
 
@@ -58,7 +58,7 @@ public class Result : IResult
         httpContext.Response.StatusCode = ErrorValue.Status;
         httpContext.Response.ContentType = "application/json";
         await httpContext.Response.WriteAsync(
-            CleanResultConfiguration.AspNetCore.ErrorSerializationFunction(ErrorValue)
+            CleanResultConfiguration.Options.AspNetCore.ErrorSerializationFunction(ErrorValue)
         );
     }
 
@@ -159,10 +159,10 @@ public class Result : IResult
             InternalErrorValue = new Error
             {
                 Type = ProblemDetailsTypeMappings.GetProblemType(
-                    CleanResultConfiguration.Errors.DefaultStatusCode
+                    CleanResultConfiguration.Options.Errors.DefaultStatusCode
                 ),
                 Title = title,
-                Status = CleanResultConfiguration.Errors.DefaultStatusCode,
+                Status = CleanResultConfiguration.Options.Errors.DefaultStatusCode,
             },
         };
     }

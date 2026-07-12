@@ -60,10 +60,10 @@ public class Result<T> : IResult
                     ?? new Error
                     {
                         Type = ProblemDetailsTypeMappings.GetProblemType(
-                            CleanResultConfiguration.Errors.DefaultStatusCode
+                            CleanResultConfiguration.Options.Errors.DefaultStatusCode
                         ),
-                        Title = CleanResultConfiguration.Errors.DefaultUnknownTitle,
-                        Status = CleanResultConfiguration.Errors.DefaultStatusCode,
+                        Title = CleanResultConfiguration.Options.Errors.DefaultUnknownTitle,
+                        Status = CleanResultConfiguration.Options.Errors.DefaultStatusCode,
                     }
                 : throw new InvalidOperationException("Result is not an error");
         }
@@ -83,7 +83,7 @@ public class Result<T> : IResult
             }
 
             httpContext.Response.StatusCode =
-                SuccessStatus ?? CleanResultConfiguration.AspNetCore.DefaultValueSuccessStatusCode;
+                SuccessStatus ?? CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode;
             httpContext.Response.ContentType = ContentTypeResolver.GetContentType<T>();
 
             // Handle different types appropriately
@@ -105,7 +105,7 @@ public class Result<T> : IResult
                     if (ContentTypeResolver.ShouldSerializeAsJson<T>())
                     {
                         await httpContext.Response.WriteAsync(
-                            CleanResultConfiguration.AspNetCore.SuccessSerializationFunction(Value)
+                            CleanResultConfiguration.Options.AspNetCore.SuccessSerializationFunction(Value)
                         );
                     }
                     else
@@ -123,7 +123,7 @@ public class Result<T> : IResult
         httpContext.Response.StatusCode = ErrorValue.Status;
         httpContext.Response.ContentType = "application/json";
         await httpContext.Response.WriteAsync(
-            CleanResultConfiguration.AspNetCore.ErrorSerializationFunction(ErrorValue)
+            CleanResultConfiguration.Options.AspNetCore.ErrorSerializationFunction(ErrorValue)
         );
     }
 
@@ -311,10 +311,10 @@ public class Result<T> : IResult
             InternalErrorValue = new Error
             {
                 Type = ProblemDetailsTypeMappings.GetProblemType(
-                    CleanResultConfiguration.Errors.DefaultStatusCode
+                    CleanResultConfiguration.Options.Errors.DefaultStatusCode
                 ),
                 Title = title,
-                Status = CleanResultConfiguration.Errors.DefaultStatusCode,
+                Status = CleanResultConfiguration.Options.Errors.DefaultStatusCode,
             },
         };
     }

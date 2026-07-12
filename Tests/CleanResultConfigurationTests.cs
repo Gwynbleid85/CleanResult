@@ -20,7 +20,7 @@ public class CleanResultConfigurationTests : IDisposable
     [Fact]
     public async Task DefaultSimpleSuccessStatusCodeHasDefaultValue()
     {
-        Assert.Equal(StatusCodes.Status204NoContent, CleanResultConfiguration.AspNetCore.DefaultSimpleSuccessStatusCode);
+        Assert.Equal(StatusCodes.Status204NoContent, CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode);
 
         var httpContext = HttpContextUtils.GetHttpContext();
         await Result.Ok().ExecuteAsync(httpContext);
@@ -31,7 +31,7 @@ public class CleanResultConfigurationTests : IDisposable
     [Fact]
     public async Task DefaultSimpleSuccessStatusCodeCanBeOverridden()
     {
-        CleanResultConfiguration.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status202Accepted;
+        CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status202Accepted;
 
         var httpContext = HttpContextUtils.GetHttpContext();
         await Result.Ok().ExecuteAsync(httpContext);
@@ -42,7 +42,7 @@ public class CleanResultConfigurationTests : IDisposable
     [Fact]
     public async Task DefaultValueSuccessStatusCodeHasDefaultValue()
     {
-        Assert.Equal(StatusCodes.Status200OK, CleanResultConfiguration.AspNetCore.DefaultValueSuccessStatusCode);
+        Assert.Equal(StatusCodes.Status200OK, CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode);
 
         var httpContext = HttpContextUtils.GetHttpContext();
         await Result.Ok(new { Message = "Success" }).ExecuteAsync(httpContext);
@@ -53,7 +53,7 @@ public class CleanResultConfigurationTests : IDisposable
     [Fact]
     public async Task DefaultValueSuccessStatusCodeCanBeOverridden()
     {
-        CleanResultConfiguration.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status201Created;
+        CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status201Created;
 
         var httpContext = HttpContextUtils.GetHttpContext();
         await Result.Ok(new { Message = "Success" }).ExecuteAsync(httpContext);
@@ -64,7 +64,7 @@ public class CleanResultConfigurationTests : IDisposable
     [Fact]
     public void DefaultErrorStatusCodeHasDefaultValue()
     {
-        Assert.Equal(StatusCodes.Status500InternalServerError, CleanResultConfiguration.Errors.DefaultStatusCode);
+        Assert.Equal(StatusCodes.Status500InternalServerError, CleanResultConfiguration.Options.Errors.DefaultStatusCode);
 
         var errorResult = Result.Error();
         var errorWithTitle = Result.Error("Error message");
@@ -76,7 +76,7 @@ public class CleanResultConfigurationTests : IDisposable
     [Fact]
     public void DefaultErrorStatusCodeCanBeOverridden()
     {
-        CleanResultConfiguration.Errors.DefaultStatusCode = StatusCodes.Status418ImATeapot;
+        CleanResultConfiguration.Options.Errors.DefaultStatusCode = StatusCodes.Status418ImATeapot;
 
         var errorResult = Result.Error();
         var errorWithTitle = Result.Error("Error message");
@@ -88,7 +88,7 @@ public class CleanResultConfigurationTests : IDisposable
     [Fact]
     public void DefaultUnknownTitleHasDefaultValue()
     {
-        Assert.Equal("Unknown error", CleanResultConfiguration.Errors.DefaultUnknownTitle);
+        Assert.Equal("Unknown error", CleanResultConfiguration.Options.Errors.DefaultUnknownTitle);
 
         var errorResult = Result.Error();
 
@@ -98,7 +98,7 @@ public class CleanResultConfigurationTests : IDisposable
     [Fact]
     public void DefaultUnknownTitleCanBeOverridden()
     {
-        CleanResultConfiguration.Errors.DefaultUnknownTitle = "Configured unknown error";
+        CleanResultConfiguration.Options.Errors.DefaultUnknownTitle = "Configured unknown error";
 
         var errorResult = Result.Error();
 
@@ -118,7 +118,7 @@ public class CleanResultConfigurationTests : IDisposable
     [Fact]
     public async Task SuccessSerializationFunctionCanBeOverridden()
     {
-        CleanResultConfiguration.AspNetCore.SuccessSerializationFunction = _ => "custom-success";
+        CleanResultConfiguration.Options.AspNetCore.SuccessSerializationFunction = _ => "custom-success";
 
         var httpContext = HttpContextUtils.GetHttpContext();
         await Result.Ok(new { FirstName = "Ada" }).ExecuteAsync(httpContext);
@@ -141,7 +141,7 @@ public class CleanResultConfigurationTests : IDisposable
     [Fact]
     public async Task ErrorSerializationFunctionCanBeOverridden()
     {
-        CleanResultConfiguration.AspNetCore.ErrorSerializationFunction = value =>
+        CleanResultConfiguration.Options.AspNetCore.ErrorSerializationFunction = value =>
         {
             var error = (Error)value;
             return $"custom-error:{error.Status}:{error.Title}";
@@ -155,16 +155,16 @@ public class CleanResultConfigurationTests : IDisposable
 
     private static void ResetConfiguration()
     {
-        CleanResultConfiguration.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status204NoContent;
-        CleanResultConfiguration.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status200OK;
-        CleanResultConfiguration.AspNetCore.SuccessSerializationFunction = value =>
+        CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status204NoContent;
+        CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status200OK;
+        CleanResultConfiguration.Options.AspNetCore.SuccessSerializationFunction = value =>
             JsonSerializer.Serialize(
                 value,
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
             );
-        CleanResultConfiguration.AspNetCore.ErrorSerializationFunction = value => JsonSerializer.Serialize(value);
+        CleanResultConfiguration.Options.AspNetCore.ErrorSerializationFunction = value => JsonSerializer.Serialize(value);
 
-        CleanResultConfiguration.Errors.DefaultStatusCode = StatusCodes.Status500InternalServerError;
-        CleanResultConfiguration.Errors.DefaultUnknownTitle = "Unknown error";
+        CleanResultConfiguration.Options.Errors.DefaultStatusCode = StatusCodes.Status500InternalServerError;
+        CleanResultConfiguration.Options.Errors.DefaultUnknownTitle = "Unknown error";
     }
 }

@@ -345,21 +345,21 @@ using Microsoft.AspNetCore.Http;
 
 // Default status code for Result.Ok() responses without a body.
 // Default: 204 No Content
-CleanResultConfiguration.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status204NoContent;
+CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status204NoContent;
 
 // Default status code for Result<T>.Ok(value) responses.
 // Default: 200 OK
-CleanResultConfiguration.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status200OK;
+CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status200OK;
 
 // Customize success response serialization for JSON values.
-CleanResultConfiguration.AspNetCore.SuccessSerializationFunction = value =>
+CleanResultConfiguration.Options.AspNetCore.SuccessSerializationFunction = value =>
     JsonSerializer.Serialize(value, new JsonSerializerOptions
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
     });
 
 // Customize error response serialization.
-CleanResultConfiguration.AspNetCore.ErrorSerializationFunction = error =>
+CleanResultConfiguration.Options.AspNetCore.ErrorSerializationFunction = error =>
     JsonSerializer.Serialize(error);
 ```
 
@@ -373,18 +373,18 @@ using Microsoft.AspNetCore.Http;
 
 // Default status code for unspecified errors.
 // Default: 500 Internal Server Error
-CleanResultConfiguration.Errors.DefaultStatusCode = StatusCodes.Status500InternalServerError;
+CleanResultConfiguration.Options.Errors.DefaultStatusCode = StatusCodes.Status500InternalServerError;
 
 // Default title for unspecified errors.
 // Default: "Unknown error"
-CleanResultConfiguration.Errors.DefaultUnknownTitle = "Unknown error";
+CleanResultConfiguration.Options.Errors.DefaultUnknownTitle = "Unknown error";
 ```
 
 For example:
 
 ```csharp
-CleanResultConfiguration.Errors.DefaultStatusCode = StatusCodes.Status400BadRequest;
-CleanResultConfiguration.Errors.DefaultUnknownTitle = "Invalid request";
+CleanResultConfiguration.Options.Errors.DefaultStatusCode = StatusCodes.Status400BadRequest;
+CleanResultConfiguration.Options.Errors.DefaultUnknownTitle = "Invalid request";
 
 var result = Result.Error();
 
