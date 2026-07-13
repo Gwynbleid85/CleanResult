@@ -106,7 +106,7 @@ public class Result<T> : IResult
                     if (ContentTypeResolver.ShouldSerializeAsJson<T>())
                     {
                         await httpContext.Response.WriteAsync(
-                            CleanResultConfiguration.Options.AspNetCore.SuccessSerializer(Value)
+                            CleanResultConfiguration.Options.AspNetCore.SuccessSerializer(Value, typeof(T))
                         );
                     }
                     else

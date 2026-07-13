@@ -90,8 +90,10 @@ public class CleanResultConfigurationTests : IDisposable
     {
         CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions = new JsonSerializerOptions();
 
+        var value = new { FirstName = "Ada" };
         var serialized = CleanResultConfiguration.Options.AspNetCore.SuccessSerializer(
-            new { FirstName = "Ada" }
+            value,
+            value.GetType()
         );
 
         Assert.Equal("""{"FirstName":"Ada"}""", serialized);
@@ -144,9 +146,11 @@ public class CleanResultConfigurationTests : IDisposable
     [Fact]
     public async Task SuccessSerializerHasDefaultValue()
     {
+        var value = new { FirstName = "Ada" };
+
         Assert.Equal(
             """{"firstName":"Ada"}""",
-            CleanResultConfiguration.Options.AspNetCore.SuccessSerializer(new { FirstName = "Ada" })
+            CleanResultConfiguration.Options.AspNetCore.SuccessSerializer(value, value.GetType())
         );
 
         var httpContext = HttpContextUtils.GetHttpContext();
@@ -158,12 +162,37 @@ public class CleanResultConfigurationTests : IDisposable
     [Fact]
     public async Task SuccessSerializerCanBeOverridden()
     {
-        CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = _ => "custom-success";
+        CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = (_, _) => "custom-success";
 
         var httpContext = HttpContextUtils.GetHttpContext();
         await Result.Ok(new { FirstName = "Ada" }).ExecuteAsync(httpContext);
 
         Assert.Equal("custom-success", HttpContextUtils.ReadContextBody(httpContext));
+    }
+
+    [Fact]
+    public async Task SuccessSerializerReceivesDeclaredResultType()
+    {
+        Type? serializedType = null;
+        CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = (_, type) =>
+        {
+            serializedType = type;
+            return "{}";
+        };
+
+        var httpContext = HttpContextUtils.GetHttpContext();
+        await Result<UserDto>.Ok(new AdminUserDto()).ExecuteAsync(httpContext);
+
+        Assert.Equal(typeof(UserDto), serializedType);
+    }
+
+    [Fact]
+    public async Task SuccessResponseSerializesUsingDeclaredResultType()
+    {
+        var httpContext = HttpContextUtils.GetHttpContext();
+        await Result<UserDto>.Ok(new AdminUserDto { Name = "ada", SecretToken = "LEAKED" }).ExecuteAsync(httpContext);
+
+        Assert.Equal("""{"name":"ada"}""", HttpContextUtils.ReadContextBody(httpContext));
     }
 
     [Fact]
@@ -248,12 +277,22 @@ public class CleanResultConfigurationTests : IDisposable
         CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status204NoContent;
         CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status200OK;
         CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-        CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = value =>
-            JsonSerializer.Serialize(value, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
+        CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = (value, type) =>
+            JsonSerializer.Serialize(value, type, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
         CleanResultConfiguration.Options.AspNetCore.ErrorSerializer = value =>
             JsonSerializer.Serialize(value, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
 
         CleanResultConfiguration.Options.Errors.DefaultStatusCode = StatusCodes.Status500InternalServerError;
         CleanResultConfiguration.Options.Errors.DefaultUnknownTitle = "Unknown error";
+    }
+
+    private class UserDto
+    {
+        public string Name { get; init; } = string.Empty;
+    }
+
+    private class AdminUserDto : UserDto
+    {
+        public string SecretToken { get; init; } = string.Empty;
     }
 }

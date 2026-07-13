@@ -54,10 +54,11 @@ public sealed class AspNetCoreResultOptions
     /// <summary>
     /// Serializes success values using <see cref="JsonSerializerOptions" />.
     /// </summary>
-    public Func<object?, string> SuccessSerializer { get; set; } =
-        value =>
+    public Func<object?, Type, string> SuccessSerializer { get; set; } =
+        (value, type) =>
             JsonSerializer.Serialize(
                 value,
+                type,
                 CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions
             );
 

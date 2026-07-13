@@ -359,9 +359,9 @@ CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions = new JsonSeri
 };
 
 // Advanced: fully customize success response serialization.
-// Default: value => JsonSerializer.Serialize(value, JsonSerializerOptions)
-CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = value =>
-    JsonSerializer.Serialize(value, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
+// Default: (value, type) => JsonSerializer.Serialize(value, type, JsonSerializerOptions)
+CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = (value, type) =>
+    JsonSerializer.Serialize(value, type, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
 
 // Advanced: fully customize error response serialization.
 // Default: error => JsonSerializer.Serialize(error, JsonSerializerOptions)
@@ -375,7 +375,8 @@ read `CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions` each ti
 
 Use `SuccessSerializer` or `ErrorSerializer` only when serializer options are not enough, such as wrapping responses,
 using a different serializer, or producing a non-standard JSON shape. If you replace either serializer, that delegate is
-responsible for using `JsonSerializerOptions` if you still want those options to apply.
+responsible for using `JsonSerializerOptions` if you still want those options to apply. Success serializers also receive
+the declared `Result<T>` payload type so base-typed results do not accidentally expose derived members.
 
 ```csharp
 // Recommended: customize System.Text.Json behavior for both default serializers.
@@ -384,8 +385,8 @@ CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions = new JsonSeri
     WriteIndented = true
 };
 
-// Advanced: replace only success serialization. This delegate explicitly opts into the configured options.
-CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = value =>
+// Advanced: replace only success serialization. The type parameter is the declared Result<T> payload type.
+CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = (value, type) =>
     JsonSerializer.Serialize(new { data = value }, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
 
 // Advanced: replace error serialization. If the delegate ignores JsonSerializerOptions, those options no longer affect errors.
