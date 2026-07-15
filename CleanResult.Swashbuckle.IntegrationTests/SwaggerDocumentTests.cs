@@ -1,5 +1,7 @@
 using System.Text.Json.Nodes;
+using CleanResult;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace CleanResult.Swashbuckle.IntegrationTests;
@@ -41,6 +43,35 @@ public class SwaggerDocumentTests : IClassFixture<SwaggerAppFactory>
         Assert.Equal("integer", intSchema!["type"]?.GetValue<string>());
         Assert.Equal("#/components/schemas/CustomResponse", GetResponseSchemaRef(paths, "/custom-response", "get", "200"));
         Assert.Equal("#/components/schemas/NullableResponse", GetResponseSchemaRef(paths, "/nullable-test2", "get", "200"));
+    }
+
+    [Fact]
+    public async Task SwaggerDocumentUsesConfiguredSuccessStatusCodes()
+    {
+        CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status202Accepted;
+        CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status201Created;
+
+        try
+        {
+            var response = await _client.GetAsync("/swagger/v1/swagger.json");
+            response.EnsureSuccessStatusCode();
+
+            var document = JsonNode.Parse(await response.Content.ReadAsStringAsync())!.AsObject();
+            var paths = document["paths"]!.AsObject();
+
+            Assert.Equal("integer", GetResponseSchema(paths, "/", "get", "201")!["type"]?.GetValue<string>());
+
+            var noContentResponses = paths["/no-content"]!["get"]!["responses"]!.AsObject();
+            Assert.True(noContentResponses.ContainsKey("202"));
+            Assert.False(noContentResponses.ContainsKey("204"));
+            Assert.False(noContentResponses.ContainsKey("200"));
+            Assert.Null(noContentResponses["202"]!["content"]);
+        }
+        finally
+        {
+            CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status204NoContent;
+            CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status200OK;
+        }
     }
 
     [Fact]
