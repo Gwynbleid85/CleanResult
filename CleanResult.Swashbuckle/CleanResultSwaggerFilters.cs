@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using CleanResult;
 using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -23,7 +22,8 @@ internal class CleanResultReturnTypeFilter : IOperationFilter
 
         if (returnType == typeof(Result))
         {
-            var successStatusCode = CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode.ToString();
+            var successStatusCode =
+                CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode.ToString();
 
             operation.Responses?.Remove("200");
             operation.Responses?.Remove("204");
@@ -36,7 +36,8 @@ internal class CleanResultReturnTypeFilter : IOperationFilter
 
         if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Result<>))
         {
-            var successStatusCode = CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode.ToString();
+            var successStatusCode =
+                CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode.ToString();
 
             operation.Responses?.Remove("200");
             operation.Responses?.Remove(successStatusCode);
