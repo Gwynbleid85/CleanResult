@@ -64,39 +64,12 @@ public class CleanResultConfigurationTests : IDisposable
     }
 
     [Fact]
-    public async Task JsonSerializerOptionsHasDefaultValue()
+    public async Task DefaultJsonSerializationUsesWebDefaults()
     {
-        Assert.Equal(JsonNamingPolicy.CamelCase, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions.PropertyNamingPolicy);
-
         var httpContext = HttpContextUtils.GetHttpContext();
         await Result.Ok(new { FirstName = "Ada" }).ExecuteAsync(httpContext);
 
         Assert.Equal("""{"firstName":"Ada"}""", HttpContextUtils.ReadContextBody(httpContext));
-    }
-
-    [Fact]
-    public async Task JsonSerializerOptionsCanBeOverridden()
-    {
-        CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions = new JsonSerializerOptions();
-
-        var httpContext = HttpContextUtils.GetHttpContext();
-        await Result.Ok(new { FirstName = "Ada" }).ExecuteAsync(httpContext);
-
-        Assert.Equal("""{"FirstName":"Ada"}""", HttpContextUtils.ReadContextBody(httpContext));
-    }
-
-    [Fact]
-    public void DefaultSuccessSerializerUsesUpdatedJsonSerializerOptions()
-    {
-        CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions = new JsonSerializerOptions();
-
-        var value = new { FirstName = "Ada" };
-        var serialized = CleanResultConfiguration.Options.AspNetCore.SuccessSerializer(
-            value,
-            value.GetType()
-        );
-
-        Assert.Equal("""{"FirstName":"Ada"}""", serialized);
     }
 
     [Fact]
@@ -276,11 +249,10 @@ public class CleanResultConfigurationTests : IDisposable
     {
         CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status204NoContent;
         CleanResultConfiguration.Options.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status200OK;
-        CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         CleanResultConfiguration.Options.AspNetCore.SuccessSerializer = (value, type) =>
-            JsonSerializer.Serialize(value, type, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
+            JsonSerializer.Serialize(value, type, new JsonSerializerOptions(JsonSerializerDefaults.Web));
         CleanResultConfiguration.Options.AspNetCore.ErrorSerializer = value =>
-            JsonSerializer.Serialize(value, CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions);
+            JsonSerializer.Serialize(value, new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
         CleanResultConfiguration.Options.Errors.DefaultStatusCode = StatusCodes.Status500InternalServerError;
         CleanResultConfiguration.Options.Errors.DefaultUnknownTitle = "Unknown error";

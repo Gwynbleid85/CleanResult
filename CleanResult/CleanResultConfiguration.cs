@@ -46,31 +46,16 @@ public sealed class AspNetCoreResultOptions
     public int DefaultValueSuccessStatusCode { get; set; } = StatusCodes.Status200OK;
 
     /// <summary>
-    /// JSON serializer options used for ASP.NET Core JSON responses.
-    /// </summary>
-    public JsonSerializerOptions JsonSerializerOptions { get; set; } =
-        new(JsonSerializerDefaults.Web);
-
-    /// <summary>
-    /// Serializes success values using <see cref="JsonSerializerOptions" />.
+    /// Serializes success values.
     /// </summary>
     public Func<object?, Type, string> SuccessSerializer { get; set; } =
-        (value, type) =>
-            JsonSerializer.Serialize(
-                value,
-                type,
-                CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions
-            );
+        (value, type) => JsonSerializer.Serialize(value, type, new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
     /// <summary>
-    /// Serializes error values using <see cref="JsonSerializerOptions" />.
+    /// Serializes error values.
     /// </summary>
     public Func<object, string> ErrorSerializer { get; set; } =
-        value =>
-            JsonSerializer.Serialize(
-                value,
-                CleanResultConfiguration.Options.AspNetCore.JsonSerializerOptions
-            );
+        value => JsonSerializer.Serialize(value, new JsonSerializerOptions(JsonSerializerDefaults.Web));
 }
 
 /// <summary>
