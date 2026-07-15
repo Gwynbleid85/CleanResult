@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
 
@@ -24,14 +23,23 @@ public class Result : IResult
     internal Error? InternalErrorValue { get; init; }
 
     [JsonIgnore]
-    public Error ErrorValue => !Success
-        ? InternalErrorValue ?? new Error
+    public Error ErrorValue
+    {
+        get
         {
-            Type = ProblemDetailsTypeMappings.GetProblemType(500),
-            Title = "Unknown error",
-            Status = StatusCodes.Status500InternalServerError
+            return !Success
+                ? InternalErrorValue
+                    ?? new Error
+                    {
+                        Type = ProblemDetailsTypeMappings.GetProblemType(
+                            CleanResultConfiguration.Options.Errors.DefaultStatusCode
+                        ),
+                        Title = CleanResultConfiguration.Options.Errors.DefaultUnknownTitle,
+                        Status = CleanResultConfiguration.Options.Errors.DefaultStatusCode,
+                    }
+                : throw new InvalidOperationException("Result is not an error");
         }
-        : throw new InvalidOperationException("Result is not an error");
+    }
 
     /// <summary>
     /// IResult interface implementation to allow using in the same way as IResult.
@@ -41,16 +49,19 @@ public class Result : IResult
         if (IsOk())
         {
             httpContext.Response.ContentType = "application/json";
-            httpContext.Response.StatusCode = SuccessStatus ?? StatusCodes.Status204NoContent;
+            httpContext.Response.StatusCode =
+                SuccessStatus
+                ?? CleanResultConfiguration.Options.AspNetCore.DefaultSimpleSuccessStatusCode;
             return;
         }
 
         // Error
         httpContext.Response.StatusCode = ErrorValue.Status;
         httpContext.Response.ContentType = "application/json";
-        await httpContext.Response.WriteAsync(JsonSerializer.Serialize(InternalErrorValue));
+        await httpContext.Response.WriteAsync(
+            CleanResultConfiguration.Options.AspNetCore.ErrorSerializer(ErrorValue)
+        );
     }
-
 
     /// <summary>
     /// Creates a new Result object representing success.
@@ -62,13 +73,13 @@ public class Result : IResult
     }
 
     /// <summary>
-    /// Creates a new Result object representing success with a custom HTTP status code and no body.
+    /// Creates a new Result object representing success with a custom HTTP status code and nobody.
     /// </summary>
-    /// <param name="statusCode">The HTTP status code returned by <see cref="ExecuteAsync"/></param>
+    /// <param name="statusCode">The HTTP status code returned by <see cref="ExecuteAsync" /></param>
     /// <returns>Result object representing success</returns>
     /// <remarks>
     /// A single-argument <c>Ok(int)</c> overload is intentionally not provided because it would
-    /// collide with the generic <see cref="Ok{T}(T)"/> forwarder and silently reroute
+    /// collide with the generic <see cref="Ok{T}(T)" /> forwarder and silently reroute
     /// <c>Result.Ok(42)</c> to the no-body overload.
     /// </remarks>
     public static Result Ok(HttpStatusCode statusCode)
@@ -91,7 +102,7 @@ public class Result : IResult
     /// Creates a new generics Result object representing success with a custom HTTP status code.
     /// </summary>
     /// <param name="value">Value of the success</param>
-    /// <param name="statusCode">The HTTP status code returned by <see cref="Result{T}.ExecuteAsync"/></param>
+    /// <param name="statusCode">The HTTP status code returned by <see cref="Result{T}.ExecuteAsync" /></param>
     /// <typeparam name="T">Type for the generics Result</typeparam>
     /// <returns>Result object representing success</returns>
     public static Result<T> Ok<T>(T value, int statusCode)
@@ -103,7 +114,7 @@ public class Result : IResult
     /// Creates a new generics Result object representing success with a custom HTTP status code.
     /// </summary>
     /// <param name="value">Value of the success</param>
-    /// <param name="statusCode">The HTTP status code returned by <see cref="Result{T}.ExecuteAsync"/></param>
+    /// <param name="statusCode">The HTTP status code returned by <see cref="Result{T}.ExecuteAsync" /></param>
     /// <typeparam name="T">Type for the generics Result</typeparam>
     /// <returns>Result object representing success</returns>
     public static Result<T> Ok<T>(T value, HttpStatusCode statusCode)
@@ -123,7 +134,7 @@ public class Result : IResult
         return new Result
         {
             Success = result.Success,
-            InternalErrorValue = result.InternalErrorValue
+            InternalErrorValue = result.InternalErrorValue,
         };
     }
 
@@ -148,10 +159,12 @@ public class Result : IResult
             Success = false,
             InternalErrorValue = new Error
             {
-                Type = ProblemDetailsTypeMappings.GetProblemType(500),
+                Type = ProblemDetailsTypeMappings.GetProblemType(
+                    CleanResultConfiguration.Options.Errors.DefaultStatusCode
+                ),
                 Title = title,
-                Status = (int)HttpStatusCode.InternalServerError
-            }
+                Status = CleanResultConfiguration.Options.Errors.DefaultStatusCode,
+            },
         };
     }
 
@@ -165,8 +178,14 @@ public class Result : IResult
     /// <param name="instance">A URI reference that identifies the specific occurrence of the problem</param>
     /// <param name="errors">Dictionary od additional errors</param>
     /// <returns>Result object representing an error</returns>
-    public static Result Error(string title, int status, string? type = null,
-        string? detail = null, string? instance = null, IDictionary<string, string[]>? errors = null)
+    public static Result Error(
+        string title,
+        int status,
+        string? type = null,
+        string? detail = null,
+        string? instance = null,
+        IDictionary<string, string[]>? errors = null
+    )
     {
         return new Result
         {
@@ -178,11 +197,10 @@ public class Result : IResult
                 Status = status,
                 Detail = detail,
                 Instance = instance,
-                Errors = errors
-            }
+                Errors = errors,
+            },
         };
     }
-
 
     /// <summary>
     /// Creates a new Result object representing an error.
@@ -194,9 +212,14 @@ public class Result : IResult
     /// <param name="instance">A URI reference that identifies the specific occurrence of the problem</param>
     /// <param name="errors">Dictionary od additional errors</param>
     /// <returns>Result object representing an error</returns>
-    public static Result Error(string title, HttpStatusCode status,
+    public static Result Error(
+        string title,
+        HttpStatusCode status,
         string? type = null,
-        string? detail = null, string? instance = null, IDictionary<string, string[]>? errors = null)
+        string? detail = null,
+        string? instance = null,
+        IDictionary<string, string[]>? errors = null
+    )
     {
         return new Result
         {
@@ -208,8 +231,8 @@ public class Result : IResult
                 Status = (int)status,
                 Detail = detail,
                 Instance = instance,
-                Errors = errors
-            }
+                Errors = errors,
+            },
         };
     }
 

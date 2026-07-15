@@ -45,6 +45,40 @@ dotnet add package CleanResult.AspNet
 
 ## 🚀 Usage
 
+### Configuration
+
+Use `AddCleanResult` in `Program.cs` during application startup to configure the global CleanResult options:
+
+```csharp
+using CleanResult.AspNet;
+using Microsoft.AspNetCore.Http;
+
+builder.Services.AddCleanResult(options =>
+{
+    options.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status201Created;
+    options.Errors.DefaultUnknownTitle = "Unexpected error";
+});
+```
+
+`AddCleanResult` updates `CleanResultConfiguration.Options` and returns the same `IServiceCollection`, so it can be chained with other service registrations. Because the configuration is global, it applies to both direct `Result` responses and `ToIActionResult()` responses.
+
+Common options include:
+
+```csharp
+builder.Services.AddCleanResult(options =>
+{
+    // Result.Ok() without a body. Default: 204 No Content.
+    options.AspNetCore.DefaultSimpleSuccessStatusCode = StatusCodes.Status204NoContent;
+
+    // Result<T>.Ok(value). Default: 200 OK.
+    options.AspNetCore.DefaultValueSuccessStatusCode = StatusCodes.Status200OK;
+
+    // Default fallback error values.
+    options.Errors.DefaultStatusCode = StatusCodes.Status500InternalServerError;
+    options.Errors.DefaultUnknownTitle = "Unknown error";
+});
+```
+
 ### Basic Conversion
 
 ```csharp

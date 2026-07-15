@@ -27,5 +27,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CleanResult\CleanResult.csproj" />
+    <ProjectReference Include="..\CleanResult.AspNet\CleanResult.AspNet.csproj" />
   </ItemGroup>
 </Project>
